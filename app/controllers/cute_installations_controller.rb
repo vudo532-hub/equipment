@@ -3,11 +3,9 @@ class CuteInstallationsController < ApplicationController
   before_action :set_installation, only: [:show, :edit, :update, :destroy]
 
   def index
-    @installations = current_user.cute_installations
-                                 .includes(:cute_equipments)
-                                 .ordered
-    @installations = @installations.search_by_name(params[:search]) if params[:search].present?
-    @installations = @installations.by_type(params[:installation_type]) if params[:installation_type].present?
+    @q = current_user.cute_installations.ransack(params[:q])
+    @q.sorts = "name asc" if @q.sorts.empty?
+    @installations = @q.result(distinct: true).includes(:cute_equipments)
   end
 
   def show

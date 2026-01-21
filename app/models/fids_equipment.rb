@@ -57,6 +57,15 @@ class FidsEquipment < ApplicationRecord
     I18n.t("equipment_statuses.#{status}", default: status.humanize)
   end
 
+  # Ransack configuration
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name equipment_type equipment_model inventory_number serial_number status notes created_at updated_at last_action_date fids_installation_id]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[fids_installation]
+  end
+
   private
 
   def update_last_action_date

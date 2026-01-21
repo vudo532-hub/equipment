@@ -1,0 +1,43 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Места установки FIDS") do |sheet|
+  # Стили
+  header_style = sheet.styles.add_style(
+    bg_color: "70AD47",
+    fg_color: "FFFFFF",
+    b: true,
+    sz: 12,
+    alignment: { horizontal: :center, vertical: :center }
+  )
+  
+  date_style = sheet.styles.add_style(
+    format_code: "DD.MM.YYYY"
+  )
+  
+  # Заголовки
+  sheet.add_row [
+    "№",
+    "Название",
+    "Тип",
+    "Идентификатор",
+    "Кол-во оборудования",
+    "Дата создания",
+    "Последнее изменение"
+  ], style: header_style
+  
+  # Данные
+  @installations.each_with_index do |installation, index|
+    sheet.add_row [
+      index + 1,
+      installation.name,
+      installation.installation_type,
+      installation.identifier,
+      installation.equipment_count,
+      installation.created_at,
+      installation.updated_at
+    ], style: [nil, nil, nil, nil, nil, date_style, date_style]
+  end
+  
+  # Автоширина колонок
+  sheet.column_widths 5, 30, 25, 20, 18, 15, 15
+end

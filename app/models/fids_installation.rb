@@ -28,4 +28,13 @@ class FidsInstallation < ApplicationRecord
   def equipment_count
     fids_equipments.count
   end
+
+  # Ransack configuration
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name installation_type identifier created_at updated_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[fids_equipments]
+  end
 end

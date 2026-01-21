@@ -98,3 +98,6 @@ group :test do
   gem "shoulda-matchers"
   gem "simplecov", require: false
 end
+
+gem "caxlsx", "~> 4.4"
+gem "caxlsx_rails", "~> 0.6.4"

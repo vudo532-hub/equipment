@@ -3,12 +3,10 @@ class CuteEquipmentsController < ApplicationController
   before_action :set_equipment, only: [:show, :edit, :update, :destroy]
 
   def index
-    @equipments = current_user.cute_equipments
-                              .includes(:cute_installation)
-                              .ordered
-    @equipments = @equipments.search_by_name(params[:search]) if params[:search].present?
-    @equipments = @equipments.by_status(params[:status]) if params[:status].present?
-    @equipments = @equipments.where(cute_installation_id: params[:installation_id]) if params[:installation_id].present?
+    @q = current_user.cute_equipments.ransack(params[:q])
+    @q.sorts = "created_at desc" if @q.sorts.empty?
+    @equipments = @q.result(distinct: true).includes(:cute_installation)
+    @installations = current_user.cute_installations.ordered
   end
 
   def show
