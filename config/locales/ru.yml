@@ -23,22 +23,24 @@ ru:
         identifier: Идентификатор
       cute_equipment:
         equipment_type: Тип оборудования
-        model_name: Модель
+        equipment_model: Модель
         inventory_number: Инвентарный номер
         serial_number: Серийный номер
         status: Статус
         note: Примечание
         last_action_date: Дата последнего действия
         cute_installation: Место установки
+        cute_installation_id: Место установки
       fids_equipment:
         equipment_type: Тип оборудования
-        model_name: Модель
+        equipment_model: Модель
         inventory_number: Инвентарный номер
         serial_number: Серийный номер
         status: Статус
         note: Примечание
         last_action_date: Дата последнего действия
         fids_installation: Место установки
+        fids_installation_id: Место установки
     errors:
       models:
         user:
