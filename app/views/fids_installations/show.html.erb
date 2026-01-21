@@ -54,10 +54,6 @@
           <dt class="text-sm font-medium text-gray-500">Количество оборудования</dt>
           <dd class="mt-1 text-sm text-gray-900"><%= @installation.equipment_count %> шт.</dd>
         </div>
-        <div class="sm:col-span-2">
-          <dt class="text-sm font-medium text-gray-500">Описание</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @installation.description.presence || "—" %></dd>
-        </div>
         <div>
           <dt class="text-sm font-medium text-gray-500">Создано</dt>
           <dd class="mt-1 text-sm text-gray-900"><%= l @installation.created_at, format: :long %></dd>

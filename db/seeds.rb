@@ -12,11 +12,11 @@ User.where(first_name: [nil, '']).find_each do |u|
   u.update_columns(first_name: 'Пользователь', last_name: u.email.split('@').first.capitalize)
 end
 
-# Создание администратора
+# Создание администратора (сильный пароль)
 admin = User.find_or_initialize_by(email: "nn.sirotkin@svo.su")
 admin.assign_attributes(
-  password: "Admin123!",
-  password_confirmation: "Admin123!",
+  password: "SecureAdmin1!",
+  password_confirmation: "SecureAdmin1!",
   first_name: "Николай",
   last_name: "Сироткин",
   role: :admin
@@ -24,11 +24,11 @@ admin.assign_attributes(
 admin.save!
 puts "Администратор: #{admin.email} (#{admin.full_name})"
 
-# Создание тестового пользователя
+# Создание тестового пользователя (сильный пароль)
 user = User.find_or_initialize_by(email: "test@example.com")
 user.assign_attributes(
-  password: "password123",
-  password_confirmation: "password123",
+  password: "Secure1Pass",
+  password_confirmation: "Secure1Pass",
   first_name: "Тестовый",
   last_name: "Пользователь",
   role: :editor
@@ -119,8 +119,8 @@ puts "Тестовые данные созданы!"
 puts "=" * 50
 puts ""
 puts "Данные для входа:"
-puts "  Email: test@example.com"
-puts "  Пароль: password123"
+puts "  Администратор: nn.sirotkin@svo.su / SecureAdmin1!"
+puts "  Тест-пользователь: test@example.com / Secure1Pass"
 puts ""
 puts "Статистика:"
 puts "  Пользователей: #{User.count}"

@@ -23,6 +23,9 @@ class User < ApplicationRecord
   validates :first_name, presence: true, length: { maximum: 100 }
   validates :last_name, presence: true, length: { maximum: 100 }
 
+  # Strong password validation (only on create or when password is changed)
+  validates :password, strong_password: true, if: :password_required?
+
   # For audited - track who made changes
   has_associated_audits
 

@@ -63,9 +63,18 @@ RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
 
-  # Include Devise test helpers
+  # Include Warden and Devise test helpers
+  config.include Warden::Test::Helpers
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::IntegrationHelpers, type: :feature
+
+  config.before(:suite) do
+    Warden.test_mode!
+  end
+
+  config.after(:each) do
+    Warden.test_reset!
+  end
 
   # Filter lines from Rails gems in backtraces.
   config.filter_rails_from_backtrace!
