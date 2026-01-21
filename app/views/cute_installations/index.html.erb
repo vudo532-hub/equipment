@@ -1,0 +1,93 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Места установки CUTE</h1>
+      <p class="mt-1 text-sm text-gray-600">Управление местами установки оборудования CUTE</p>
+    </div>
+    <%= link_to new_cute_installation_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Добавить место
+    <% end %>
+  </div>
+
+  <!-- Search -->
+  <div class="bg-white shadow rounded-lg mb-6 p-4">
+    <%= form_tag cute_installations_path, method: :get, class: "flex gap-4" do %>
+      <div class="flex-1">
+        <%= text_field_tag :search, params[:search], 
+            placeholder: "Поиск по названию...",
+            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+      <div>
+        <%= select_tag :installation_type, 
+            options_for_select([["Все типы", ""]] + current_user.cute_installations.distinct.pluck(:installation_type).compact.map { |t| [t, t] }, params[:installation_type]),
+            class: "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+      <%= submit_tag "Поиск", class: "px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer" %>
+      <%= link_to "Сбросить", cute_installations_path, class: "px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" %>
+    <% end %>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <% if @installations.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Идентификатор</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Оборудование</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @installations.each do |installation| %>
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= cute_installation_path(installation) %>'">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900"><%= installation.name %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                  <%= installation.installation_type %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= installation.identifier || "—" %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= installation.equipment_count %> шт.
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onclick="event.stopPropagation()">
+                <%= link_to "Изменить", edit_cute_installation_path(installation), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                <%= link_to "Удалить", cute_installation_path(installation), 
+                    data: { turbo_method: :delete, turbo_confirm: "Вы уверены, что хотите удалить это место установки?" },
+                    class: "text-red-600 hover:text-red-900" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Нет мест установки</h3>
+        <p class="mt-1 text-sm text-gray-500">Начните с добавления нового места установки.</p>
+        <div class="mt-6">
+          <%= link_to new_cute_installation_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Добавить место
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

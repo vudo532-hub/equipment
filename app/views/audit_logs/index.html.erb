@@ -1,0 +1,90 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">История изменений</h1>
+    <p class="mt-1 text-sm text-gray-600">Журнал всех изменений оборудования и мест установки</p>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <% if @audits.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действие</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Объект</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Изменения</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @audits.each do |audit| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= l audit.created_at, format: :long %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% case audit.action %>
+                <% when "create" %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Создание
+                  </span>
+                <% when "update" %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    Изменение
+                  </span>
+                <% when "destroy" %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    Удаление
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <% model_name = case audit.auditable_type
+                   when "CuteEquipment" then "CUTE оборудование"
+                   when "FidsEquipment" then "FIDS оборудование"
+                   when "CuteInstallation" then "CUTE место установки"
+                   when "FidsInstallation" then "FIDS место установки"
+                   else audit.auditable_type
+                   end %>
+                <%= model_name %> #<%= audit.auditable_id %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <% if audit.audited_changes.present? %>
+                  <% audit.audited_changes.each do |field, change| %>
+                    <% next if field == "updated_at" || field == "created_at" %>
+                    <div class="mb-1">
+                      <span class="font-medium"><%= field %>:</span>
+                      <% if change.is_a?(Array) %>
+                        <span class="text-red-600 line-through"><%= change[0].presence || "—" %></span>
+                        →
+                        <span class="text-green-600"><%= change[1].presence || "—" %></span>
+                      <% else %>
+                        <span class="text-green-600"><%= change.presence || "—" %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      
+      <!-- Pagination - to be added later -->
+      <div class="px-6 py-4 border-t border-gray-200">
+        <p class="text-sm text-gray-500">Показаны последние 100 записей</p>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Нет записей</h3>
+        <p class="mt-1 text-sm text-gray-500">История изменений пока пуста.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
