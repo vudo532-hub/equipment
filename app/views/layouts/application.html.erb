@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title><%= content_for(:title) || "EMS - Система учёта оборудования" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-gray-100 min-h-screen">
+    <% if user_signed_in? %>
+      <%= render "shared/navbar" %>
+      <div class="flex">
+        <%= render "shared/sidebar" %>
+        <main class="flex-1 p-6">
+          <%= render "shared/flash_messages" %>
+          <%= yield %>
+        </main>
+      </div>
+    <% else %>
+      <main class="min-h-screen flex items-center justify-center">
+        <%= render "shared/flash_messages" %>
+        <%= yield %>
+      </main>
+    <% end %>
+  </body>
+</html>

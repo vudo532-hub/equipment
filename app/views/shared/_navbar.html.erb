@@ -1,0 +1,21 @@
+<nav class="bg-white shadow-sm border-b border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 flex items-center">
+          <span class="text-xl font-bold text-blue-600">EMS</span>
+          <span class="ml-2 text-gray-600 hidden sm:block">Система учёта оборудования</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center">
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-700"><%= current_user.email %></span>
+          <%= link_to "Выход", destroy_user_session_path, 
+              data: { turbo_method: :delete }, 
+              class: "text-sm text-red-600 hover:text-red-800" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,163 @@
+ru:
+  activerecord:
+    models:
+      user: Пользователь
+      cute_installation: Место установки CUTE
+      fids_installation: Место установки FIDS
+      cute_equipment: Оборудование CUTE
+      fids_equipment: Оборудование FIDS
+    attributes:
+      user:
+        email: Email
+        password: Пароль
+        password_confirmation: Подтверждение пароля
+        remember_me: Запомнить меня
+        current_password: Текущий пароль
+      cute_installation:
+        name: Название
+        installation_type: Тип места
+        identifier: Идентификатор
+      fids_installation:
+        name: Название
+        installation_type: Тип места
+        identifier: Идентификатор
+      cute_equipment:
+        equipment_type: Тип оборудования
+        model_name: Модель
+        inventory_number: Инвентарный номер
+        serial_number: Серийный номер
+        status: Статус
+        note: Примечание
+        last_action_date: Дата последнего действия
+        cute_installation: Место установки
+      fids_equipment:
+        equipment_type: Тип оборудования
+        model_name: Модель
+        inventory_number: Инвентарный номер
+        serial_number: Серийный номер
+        status: Статус
+        note: Примечание
+        last_action_date: Дата последнего действия
+        fids_installation: Место установки
+    errors:
+      models:
+        user:
+          attributes:
+            email:
+              taken: уже используется
+              blank: не может быть пустым
+              invalid: имеет неверный формат
+            password:
+              too_short: слишком короткий (минимум %{count} символов)
+              blank: не может быть пустым
+            password_confirmation:
+              confirmation: не совпадает с паролем
+
+  # Статусы оборудования
+  equipment_statuses:
+    active: Активно
+    inactive: Неактивно
+    maintenance: В ремонте
+    archived: В архиве
+
+  # Навигация
+  navigation:
+    dashboard: Главная
+    cute: CUTE
+    fids: FIDS
+    equipment: Оборудование
+    installations: Места установки
+    audit_logs: История изменений
+    profile: Профиль
+    sign_out: Выход
+
+  # Общие
+  common:
+    actions: Действия
+    edit: Редактировать
+    delete: Удалить
+    show: Просмотр
+    back: Назад
+    save: Сохранить
+    cancel: Отмена
+    create: Создать
+    update: Обновить
+    search: Поиск
+    filter: Фильтр
+    reset: Сбросить
+    export: Экспорт
+    export_csv: Экспорт в CSV
+    export_excel: Экспорт в Excel
+    confirm_delete: Вы уверены, что хотите удалить?
+    no_records: Записей не найдено
+    created_at: Создано
+    updated_at: Обновлено
+
+  # Flash сообщения
+  flash:
+    created: "%{resource} успешно создан(а)"
+    updated: "%{resource} успешно обновлен(а)"
+    deleted: "%{resource} успешно удален(а)"
+    error: "Произошла ошибка"
+
+  # Время
+  time:
+    formats:
+      default: "%d.%m.%Y %H:%M"
+      short: "%d.%m.%Y"
+      long: "%d %B %Y, %H:%M"
+
+  date:
+    formats:
+      default: "%d.%m.%Y"
+      short: "%d.%m"
+      long: "%d %B %Y"
+    day_names: [Воскресенье, Понедельник, Вторник, Среда, Четверг, Пятница, Суббота]
+    abbr_day_names: [Вс, Пн, Вт, Ср, Чт, Пт, Сб]
+    month_names: [~, Января, Февраля, Марта, Апреля, Мая, Июня, Июля, Августа, Сентября, Октября, Ноября, Декабря]
+    abbr_month_names: [~, янв., фев., мар., апр., мая, июн., июл., авг., сен., окт., ноя., дек.]
+
+  # Заголовки страниц
+  pages:
+    dashboard:
+      title: Панель управления
+      welcome: Добро пожаловать в систему учёта оборудования
+      cute_equipment: Оборудование CUTE
+      fids_equipment: Оборудование FIDS
+      recent_changes: Последние изменения
+      quick_actions: Быстрые действия
+      add_equipment: Добавить оборудование
+      statistics: Статистика
+
+  # Оборудование
+  equipments:
+    index:
+      title: Список оборудования
+    show:
+      title: Карточка оборудования
+      history: История изменений
+    new:
+      title: Добавление оборудования
+    edit:
+      title: Редактирование оборудования
+
+  # Места установки
+  installations:
+    index:
+      title: Места установки
+    show:
+      title: Карточка места установки
+      equipment_count: Количество оборудования
+    new:
+      title: Добавление места установки
+    edit:
+      title: Редактирование места установки
+
+  # Аудит
+  audit_logs:
+    index:
+      title: История изменений
+    actions:
+      create: Создание
+      update: Изменение
+      destroy: Удаление
