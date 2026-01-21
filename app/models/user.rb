@@ -4,6 +4,14 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Roles
+  enum :role, {
+    viewer: 0,      # Только просмотр
+    editor: 1,      # Редактирование
+    manager: 2,     # Управление
+    admin: 3        # Администратор
+  }, default: :viewer
+
   # Associations
   has_many :cute_installations, dependent: :destroy
   has_many :fids_installations, dependent: :destroy
@@ -11,8 +19,35 @@ class User < ApplicationRecord
   has_many :fids_equipments, dependent: :destroy
   has_many :api_tokens, dependent: :destroy
 
+  # Validations
+  validates :first_name, presence: true, length: { maximum: 100 }
+  validates :last_name, presence: true, length: { maximum: 100 }
+
   # For audited - track who made changes
   has_associated_audits
+
+  # Full name for display
+  def full_name
+    "#{first_name} #{last_name}".strip
+  end
+
+  def initials
+    "#{first_name.first}#{last_name.first}".upcase if first_name.present? && last_name.present?
+  end
+
+  # Role helpers
+  def can_edit?
+    editor? || manager? || admin?
+  end
+
+  def can_manage?
+    manager? || admin?
+  end
+
+  # Role display name
+  def role_name
+    I18n.t("roles.#{role}", default: role.to_s.humanize)
+  end
 
   # Statistics methods
   def cute_equipment_count

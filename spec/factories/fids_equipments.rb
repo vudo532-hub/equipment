@@ -1,13 +1,29 @@
 FactoryBot.define do
   factory :fids_equipment do
-    user { nil }
-    fids_installation { nil }
-    equipment_type { "MyString" }
-    equipment_model { "MyString" }
-    inventory_number { "MyString" }
-    serial_number { "MyString" }
-    status { 1 }
-    note { "MyText" }
-    last_action_date { "2026-01-21 16:02:45" }
+    association :user
+    association :fids_installation
+    sequence(:equipment_type) { |n| "Display Type #{n}" }
+    sequence(:equipment_model) { |n| "Display Model #{n}" }
+    sequence(:inventory_number) { |n| "INV-FIDS-#{n.to_s.rjust(5, '0')}" }
+    sequence(:serial_number) { |n| "SN-FIDS-#{n.to_s.rjust(8, '0')}" }
+    status { :active }
+    note { Faker::Lorem.sentence }
+    last_action_date { Time.current }
+
+    trait :inactive do
+      status { :inactive }
+    end
+
+    trait :maintenance do
+      status { :maintenance }
+    end
+
+    trait :archived do
+      status { :archived }
+    end
+
+    trait :without_installation do
+      fids_installation { nil }
+    end
   end
 end

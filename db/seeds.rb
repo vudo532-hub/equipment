@@ -7,12 +7,34 @@ puts "Создание тестовых данных..."
 # Отключаем audited для seeds
 Audited.auditing_enabled = false
 
-# Создание тестового пользователя
-user = User.find_or_create_by!(email: "test@example.com") do |u|
-  u.password = "password123"
-  u.password_confirmation = "password123"
+# Обновляем существующих пользователей без имени/фамилии
+User.where(first_name: [nil, '']).find_each do |u|
+  u.update_columns(first_name: 'Пользователь', last_name: u.email.split('@').first.capitalize)
 end
-puts "Пользователь: #{user.email}"
+
+# Создание администратора
+admin = User.find_or_initialize_by(email: "nn.sirotkin@svo.su")
+admin.assign_attributes(
+  password: "Admin123!",
+  password_confirmation: "Admin123!",
+  first_name: "Николай",
+  last_name: "Сироткин",
+  role: :admin
+)
+admin.save!
+puts "Администратор: #{admin.email} (#{admin.full_name})"
+
+# Создание тестового пользователя
+user = User.find_or_initialize_by(email: "test@example.com")
+user.assign_attributes(
+  password: "password123",
+  password_confirmation: "password123",
+  first_name: "Тестовый",
+  last_name: "Пользователь",
+  role: :editor
+)
+user.save!
+puts "Пользователь: #{user.email} (#{user.full_name})"
 
 # Типы мест установки CUTE
 cute_installation_types = ["Стойка регистрации", "Гейт", "Киоск самообслуживания", "Бизнес-зал"]

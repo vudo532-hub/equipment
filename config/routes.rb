@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: {
+    registrations: 'users/registrations',
+    sessions: 'users/sessions'
+  }
 
   # Dashboard
   root "pages#dashboard"
@@ -9,6 +12,9 @@ Rails.application.routes.draw do
 
   # Authenticated routes
   authenticate :user do
+    # User profile
+    resource :profile, only: [:show, :edit, :update], controller: 'profiles'
+
     # CUTE
     resources :cute_installations
     resources :cute_equipments
@@ -28,6 +34,11 @@ Rails.application.routes.draw do
 
     # API Tokens management
     resources :api_tokens, only: [:index, :create, :destroy]
+
+    # Admin routes
+    namespace :admin do
+      resources :users, only: [:index, :edit, :update]
+    end
   end
 
   # API routes

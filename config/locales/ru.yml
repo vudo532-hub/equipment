@@ -13,6 +13,9 @@ ru:
         password_confirmation: Подтверждение пароля
         remember_me: Запомнить меня
         current_password: Текущий пароль
+        first_name: Имя
+        last_name: Фамилия
+        role: Роль
       cute_installation:
         name: Название
         installation_type: Тип места
@@ -54,6 +57,13 @@ ru:
               blank: не может быть пустым
             password_confirmation:
               confirmation: не совпадает с паролем
+
+  # Роли пользователей
+  roles:
+    viewer: Только просмотр
+    editor: Редактор
+    manager: Менеджер
+    admin: Администратор
 
   # Статусы оборудования
   equipment_statuses:

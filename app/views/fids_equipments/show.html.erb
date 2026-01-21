@@ -115,6 +115,25 @@
           <dt class="text-sm font-medium text-gray-500">Обновлено</dt>
           <dd class="mt-1 text-sm text-gray-900"><%= l @equipment.updated_at, format: :long %></dd>
         </div>
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-gray-500">Последнее изменение</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <% last_audit = @equipment.audits.includes(:user).order(created_at: :desc).first %>
+            <% if last_audit && last_audit.user %>
+              <div class="flex items-center">
+                <div class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-medium">
+                  <%= last_audit.user.initials || '?' %>
+                </div>
+                <div class="ml-2">
+                  <span class="font-medium"><%= last_audit.user.full_name %></span>
+                  <span class="text-gray-500">• <%= l last_audit.created_at, format: :long %></span>
+                </div>
+              </div>
+            <% else %>
+              <span class="text-gray-400">—</span>
+            <% end %>
+          </dd>
+        </div>
       </dl>
     </div>
   </div>

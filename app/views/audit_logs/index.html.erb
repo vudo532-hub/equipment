@@ -12,6 +12,7 @@
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пользователь</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действие</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Объект</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Изменения</th>
@@ -22,6 +23,21 @@
             <tr class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= l audit.created_at, format: :long %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if audit.user.present? %>
+                  <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
+                      <%= audit.user.initials || '?' %>
+                    </div>
+                    <div class="ml-2">
+                      <div class="text-sm font-medium text-gray-900"><%= audit.user.full_name %></div>
+                      <div class="text-xs text-gray-500"><%= audit.user.email %></div>
+                    </div>
+                  </div>
+                <% else %>
+                  <span class="text-gray-400">Система</span>
+                <% end %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <% case audit.action %>

@@ -48,3 +48,4 @@
 
 # macOS
 .DS_Store
+coverage/
