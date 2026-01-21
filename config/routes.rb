@@ -25,5 +25,18 @@ Rails.application.routes.draw do
     get "export/fids_equipments", to: "exports#fids_equipments", as: :export_fids_equipments
     get "export/cute_installations", to: "exports#cute_installations", as: :export_cute_installations
     get "export/fids_installations", to: "exports#fids_installations", as: :export_fids_installations
+
+    # API Tokens management
+    resources :api_tokens, only: [:index, :create, :destroy]
+  end
+
+  # API routes
+  namespace :api do
+    namespace :v1 do
+      resources :cute_installations, only: [:index, :show, :create, :update, :destroy]
+      resources :fids_installations, only: [:index, :show, :create, :update, :destroy]
+      resources :cute_equipments, only: [:index, :show, :create, :update, :destroy]
+      resources :fids_equipments, only: [:index, :show, :create, :update, :destroy]
+    end
   end
 end

@@ -1,0 +1,145 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">API Токены</h1>
+  </div>
+
+  <%# Display newly created token (only shown once) %>
+  <% if flash[:token_created] %>
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-green-700 font-semibold">
+            Ваш новый API токен:
+          </p>
+          <div class="mt-2 flex items-center gap-2">
+            <code id="token-value" class="bg-gray-100 px-3 py-2 rounded text-sm font-mono break-all"><%= flash[:token_created] %></code>
+            <button onclick="copyToken()" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+              Копировать
+            </button>
+          </div>
+          <p class="text-xs text-green-600 mt-2">
+            ⚠️ Сохраните этот токен! Он больше не будет показан.
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Create new token form %>
+    <div class="lg:col-span-1">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Создать новый токен</h2>
+        
+        <%= form_with model: @new_token, url: api_tokens_path, class: "space-y-4" do |f| %>
+          <% if @new_token.errors.any? %>
+            <div class="bg-red-50 text-red-700 p-3 rounded">
+              <ul class="list-disc list-inside text-sm">
+                <% @new_token.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div>
+            <%= f.label :name, "Название", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", placeholder: "Например: Mobile App" %>
+          </div>
+
+          <div>
+            <%= f.label :expires_at, "Срок действия (опционально)", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.date_field :expires_at, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", min: Date.tomorrow %>
+          </div>
+
+          <div>
+            <%= f.submit "Создать токен", class: "w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer" %>
+          </div>
+        <% end %>
+      </div>
+
+      <%# API Usage info %>
+      <div class="bg-gray-50 shadow rounded-lg p-6 mt-6">
+        <h3 class="text-md font-semibold text-gray-800 mb-3">Использование API</h3>
+        <div class="text-sm text-gray-600 space-y-2">
+          <p>Добавьте заголовок в запрос:</p>
+          <code class="block bg-gray-200 p-2 rounded text-xs">
+            Authorization: Bearer YOUR_TOKEN
+          </code>
+          <p class="mt-3">Пример запроса:</p>
+          <code class="block bg-gray-200 p-2 rounded text-xs whitespace-pre-wrap">curl -H "Authorization: Bearer YOUR_TOKEN" \
+  <%= request.base_url %>/api/v1/cute_equipments</code>
+        </div>
+      </div>
+    </div>
+
+    <%# Existing tokens list %>
+    <div class="lg:col-span-2">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-800">Ваши токены (<%= @api_tokens.count %>)</h2>
+        </div>
+        
+        <% if @api_tokens.any? %>
+          <div class="divide-y divide-gray-200">
+            <% @api_tokens.each do |token| %>
+              <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900"><%= token.name %></span>
+                    <% unless token.active? %>
+                      <span class="px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">Истек</span>
+                    <% end %>
+                  </div>
+                  <div class="text-sm text-gray-500 mt-1">
+                    <span>Создан: <%= l(token.created_at, format: :short) %></span>
+                    <% if token.expires_at %>
+                      <span class="mx-2">•</span>
+                      <span>Истекает: <%= l(token.expires_at, format: :short) %></span>
+                    <% end %>
+                    <% if token.last_used_at %>
+                      <span class="mx-2">•</span>
+                      <span>Последнее использование: <%= l(token.last_used_at, format: :short) %></span>
+                    <% end %>
+                  </div>
+                  <div class="text-xs text-gray-400 mt-1 font-mono">
+                    <%= token.token[0..7] %>...
+                  </div>
+                </div>
+                <div>
+                  <%= button_to api_token_path(token), method: :delete, 
+                      data: { turbo_confirm: "Удалить токен '#{token.name}'?" },
+                      class: "px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded" do %>
+                    Удалить
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="px-6 py-12 text-center text-gray-500">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            <p class="mt-2">У вас пока нет API токенов</p>
+            <p class="text-sm">Создайте токен для доступа к API</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyToken() {
+  const tokenValue = document.getElementById('token-value').innerText;
+  navigator.clipboard.writeText(tokenValue).then(() => {
+    alert('Токен скопирован в буфер обмена!');
+  });
+}
+</script>

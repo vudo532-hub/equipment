@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :fids_installations, dependent: :destroy
   has_many :cute_equipments, dependent: :destroy
   has_many :fids_equipments, dependent: :destroy
+  has_many :api_tokens, dependent: :destroy
 
   # For audited - track who made changes
   has_associated_audits
