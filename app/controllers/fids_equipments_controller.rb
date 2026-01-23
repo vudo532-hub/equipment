@@ -8,6 +8,7 @@ class FidsEquipmentsController < ApplicationController
     @q.sorts = "created_at desc" if @q.sorts.empty?
     @equipments = @q.result(distinct: true).includes(:fids_installation)
     @installations = FidsInstallation.ordered
+    @installation_types = FidsInstallation.distinct.pluck(:installation_type).compact.sort
   end
 
   def show

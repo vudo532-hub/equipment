@@ -89,7 +89,7 @@
           <% @installation.fids_equipments.each do |equipment| %>
             <li class="py-3 flex justify-between items-center">
               <div>
-                <p class="text-sm font-medium text-gray-900"><%= equipment.name %></p>
+                <p class="text-sm font-medium text-gray-900"><%= equipment.equipment_type %> — <%= equipment.equipment_model %></p>
                 <p class="text-sm text-gray-500"><%= equipment.serial_number %></p>
               </div>
               <span class="px-2 py-1 text-xs rounded-full <%= equipment.status_color %>">

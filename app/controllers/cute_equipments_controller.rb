@@ -22,6 +22,7 @@ class CuteEquipmentsController < ApplicationController
     
     @equipments = equipments
     @installations = CuteInstallation.ordered
+    @installation_types = CuteInstallation.distinct.pluck(:installation_type).compact.sort
     
     respond_to do |format|
       format.html

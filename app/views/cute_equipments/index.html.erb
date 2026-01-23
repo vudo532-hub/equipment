@@ -23,82 +23,77 @@
 
   <!-- Filters -->
   <div class="bg-white shadow rounded-lg mt-6 mb-4 p-4">
-    <h3 class="text-sm font-medium text-gray-700 mb-3">Фильтры</h3>
-    <%= search_form_for @q, url: cute_equipments_path, method: :get, html: { class: "flex flex-wrap gap-4 items-end" } do |f| %>
-      <div class="min-w-[150px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Терминал</label>
-        <%= f.select :cute_installation_terminal_eq,
-            options_for_select([
-              ["Все терминалы", ""],
-              ["Терминал A", "terminal_a"],
-              ["Терминал B", "terminal_b"],
-              ["Терминал C", "terminal_c"],
-              ["Терминал D", "terminal_d"],
-              ["Терминал E", "terminal_e"],
-              ["Терминал F", "terminal_f"]
-            ], @q.cute_installation_terminal_eq),
-            {},
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+    <h3 class="text-sm font-medium text-gray-700 mb-4">Фильтры и поиск</h3>
+    <%= search_form_for @q, url: cute_equipments_path, method: :get, html: { class: "space-y-4" } do |f| %>
+      <div class="flex flex-wrap gap-4 items-end">
+        <div class="min-w-[150px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Терминал</label>
+          <%= f.select :cute_installation_terminal_eq,
+              options_for_select([
+                ["Все терминалы", ""],
+                ["Терминал A", 0],
+                ["Терминал B", 1],
+                ["Терминал C", 2],
+                ["Терминал D", 3],
+                ["Терминал E", 4],
+                ["Терминал F", 5]
+              ], @q.cute_installation_terminal_eq),
+              {},
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="min-w-[180px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Тип оборудования</label>
+          <%= f.select :equipment_type_eq,
+              options_for_select([
+                ["Все типы", ""],
+                ["Принтер посадочных талонов", "boarding_pass_printer"],
+                ["Принтер багажных бирок", "baggage_tag_printer"],
+                ["Клавиатура", "keyboard"],
+                ["Сканер", "scanner"],
+                ["Считыватель на гейте", "gate_reader"],
+                ["Принтер полётной документации", "flight_document_printer"],
+                ["Монитор", "monitor"],
+                ["Компьютер", "computer"],
+                ["Прочее", "other"]
+              ], @q.equipment_type_eq),
+              {},
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="min-w-[180px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Статус</label>
+          <%= f.select :status_eq,
+              options_for_select([
+                ["Все статусы", ""],
+                ["В работе", "active"],
+                ["В ремонт", "maintenance"],
+                ["Ожидается из ремонта", "waiting_repair"],
+                ["Готово к выдачи", "ready_to_dispatch"],
+                ["Списание", "decommissioned"],
+                ["Передано в другое место", "transferred"],
+                ["С примечанием", "with_note"]
+              ], @q.status_eq),
+              {},
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Тип места установки</label>
+          <%= f.select :cute_installation_installation_type_eq,
+              options_for_select(@installation_types.map { |t| [t, t] }, @q.cute_installation_installation_type_eq),
+              { include_blank: "Все типы мест" },
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
       </div>
-      <div class="min-w-[180px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Тип</label>
-        <%= f.select :equipment_type_eq,
-            options_for_select([
-              ["Все типы", ""],
-              ["Принтер посадочных талонов", "boarding_pass_printer"],
-              ["Принтер багажных бирок", "baggage_tag_printer"],
-              ["Клавиатура", "keyboard"],
-              ["Сканер", "scanner"],
-              ["Считыватель на гейте", "gate_reader"],
-              ["Принтер полётной документации", "flight_document_printer"],
-              ["Монитор", "monitor"],
-              ["Компьютер", "computer"],
-              ["Прочее", "other"]
-            ], @q.equipment_type_eq),
-            {},
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-      </div>
-      <div class="min-w-[180px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Статус</label>
-        <%= f.select :status_eq,
-            options_for_select([
-              ["Все статусы", ""],
-              ["В работе", "active"],
-              ["В ремонт", "maintenance"],
-              ["Ожидается из ремонта", "waiting_repair"],
-              ["Готово к выдачи", "ready_to_dispatch"],
-              ["Списание", "decommissioned"],
-              ["Передано в другое место", "transferred"],
-              ["С примечанием", "with_note"]
-            ], @q.status_eq),
-            {},
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-      </div>
-      <div class="min-w-[200px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Место установки</label>
-        <%= f.select :cute_installation_id_eq,
-            options_from_collection_for_select(@installations, :id, :name, @q.cute_installation_id_eq),
-            { include_blank: "Все места" },
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-      </div>
-      <div class="flex gap-2">
-        <%= f.submit "Применить", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer" %>
-        <%= link_to "Сбросить", cute_equipments_path, class: "px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" %>
-      </div>
-    <% end %>
-  </div>
-
-  <!-- Search -->
-  <div class="bg-white shadow rounded-lg mb-6 p-4">
-    <h3 class="text-sm font-medium text-gray-700 mb-3">Поиск</h3>
-    <%= search_form_for @q, url: cute_equipments_path, method: :get, html: { class: "flex gap-4 items-end" } do |f| %>
-      <div class="flex-1">
-        <%= f.search_field :inventory_number_or_serial_number_or_equipment_model_cont,
-            placeholder: "Введите инвентарный номер, серийный номер или модель...",
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-      </div>
-      <div>
-        <%= f.submit "Поиск", class: "px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer" %>
+      <div class="flex flex-wrap gap-4 items-end">
+        <div class="flex-1 min-w-[300px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Поиск</label>
+          <%= f.search_field :inventory_number_or_serial_number_or_equipment_model_cont,
+              placeholder: "Введите инвентарный номер, серийный номер или модель...",
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="flex gap-2">
+          <%= f.submit "Применить", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer" %>
+          <%= link_to "Сбросить", cute_equipments_path, class: "px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" %>
+        </div>
       </div>
     <% end %>
   </div>
@@ -113,6 +108,7 @@
             <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Инв. номер</th>
             <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Серийный номер</th>
             <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Терминал</th>
+            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Тип места</th>
             <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Место</th>
             <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Статус</th>
             <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Примечания</th>
@@ -121,7 +117,11 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <% @equipments.each do |equipment| %>
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50 mt-4" style="
+    box-sizing: border-box;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+">
               <td class="px-4 py-4 whitespace-nowrap" style="cursor: pointer;" onclick="window.location='<%= cute_equipment_path(equipment) %>'">
                 <div class="text-sm font-medium text-gray-900"><%= equipment.equipment_type_text %></div>
                 <% if equipment.equipment_model.present? %>
@@ -142,6 +142,9 @@
                 <% else %>
                   <span class="text-gray-400">—</span>
                 <% end %>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= equipment.cute_installation&.installation_type.presence || '—' %>
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                 <% if equipment.cute_installation %>

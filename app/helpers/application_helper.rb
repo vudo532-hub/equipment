@@ -26,6 +26,63 @@ module ApplicationHelper
     I18n.l(datetime, format: :long)
   end
 
+  # Название терминала по букве
+  def terminal_display_name(letter)
+    return "—" if letter.blank?
+    "Терминал #{letter}"
+  end
+
+  # Преобразование ключа терминала в букву
+  def terminal_key_to_letter(key)
+    return "?" if key.blank?
+    if key.is_a?(Integer)
+      %w[A B C D E F][key] || "?"
+    else
+      key.to_s.split("_").last.upcase
+    end
+  end
+
+  # Название типа оборудования CUTE
+  def cute_equipment_type_name(type_key)
+    return "—" if type_key.blank?
+    # type_key может быть integer (из group) или string
+    type_str = type_key.is_a?(Integer) ? CuteEquipment.equipment_types.key(type_key) : type_key.to_s
+    I18n.t("cute_equipment_types.#{type_str}", default: type_str.to_s.humanize)
+  end
+
+  # Название типа оборудования ZAMAR
+  def zamar_equipment_type_name(type_key)
+    return "—" if type_key.blank?
+    type_str = type_key.is_a?(Integer) ? ZamarEquipment.equipment_types.key(type_key) : type_key.to_s
+    I18n.t("zamar_equipment_types.#{type_str}", default: type_str.to_s.upcase)
+  end
+
+  # Название статуса оборудования
+  def equipment_status_name(status_key)
+    return "—" if status_key.blank?
+    status_str = if status_key.is_a?(Integer)
+      CuteEquipment.statuses.key(status_key) || status_key.to_s
+    else
+      status_key.to_s
+    end
+    I18n.t("equipment_statuses.#{status_str}", default: status_str.humanize)
+  end
+
+  # Цвет статуса для badge
+  def status_badge_color(status_key)
+    status_str = status_key.is_a?(Integer) ? CuteEquipment.statuses.key(status_key) : status_key.to_s
+    case status_str
+    when "active" then "bg-green-100 text-green-800"
+    when "maintenance" then "bg-yellow-100 text-yellow-800"
+    when "waiting_repair" then "bg-orange-100 text-orange-800"
+    when "ready_to_dispatch" then "bg-blue-100 text-blue-800"
+    when "decommissioned" then "bg-red-100 text-red-800"
+    when "transferred" then "bg-purple-100 text-purple-800"
+    when "with_note" then "bg-gray-100 text-gray-800"
+    else "bg-gray-100 text-gray-800"
+    end
+  end
+
   # Форматирование аудит-лога
   def format_audit_action(audit, model_class = nil)
     case audit.action

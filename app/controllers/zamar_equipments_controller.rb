@@ -8,6 +8,7 @@ class ZamarEquipmentsController < ApplicationController
     @q.sorts = "created_at desc" if @q.sorts.empty?
     @equipments = @q.result(distinct: true).includes(:zamar_installation)
     @installations = ZamarInstallation.ordered
+    @installation_types = ZamarInstallation.distinct.pluck(:installation_type).compact.sort
   end
 
   def show
