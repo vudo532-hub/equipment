@@ -64,7 +64,10 @@ RSpec.describe CuteInstallation, type: :model do
   describe '#equipment_count' do
     it 'returns count of associated equipments' do
       installation = create(:cute_installation)
-      create_list(:cute_equipment, 3, cute_installation: installation)
+      # Create equipment with different types to avoid validation error
+      create(:cute_equipment, cute_installation: installation, equipment_type: 'keyboard')
+      create(:cute_equipment, cute_installation: installation, equipment_type: 'scanner')
+      create(:cute_equipment, cute_installation: installation, equipment_type: 'monitor')
       
       expect(installation.equipment_count).to eq(3)
     end

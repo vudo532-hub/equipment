@@ -14,7 +14,7 @@ class ZamarEquipment < ApplicationRecord
     sbdo: 2,
     gates: 3,
     other: 99
-  }, prefix: true
+  }
 
   enum :status, {
     active: 0,
@@ -56,6 +56,7 @@ class ZamarEquipment < ApplicationRecord
   end
 
   def equipment_type_text
+    return "—" if equipment_type.blank?
     I18n.t("zamar_equipment_types.#{equipment_type}", default: equipment_type.to_s.upcase)
   end
 
@@ -73,6 +74,7 @@ class ZamarEquipment < ApplicationRecord
   end
 
   def status_text
+    return "—" if status.blank?
     I18n.t("equipment_statuses.#{status}", default: status.to_s.humanize)
   end
 
@@ -83,6 +85,15 @@ class ZamarEquipment < ApplicationRecord
 
   def self.ransackable_associations(auth_object = nil)
     %w[zamar_installation last_changed_by]
+  end
+
+  # Терминал через место установки
+  def terminal
+    zamar_installation&.terminal
+  end
+
+  def terminal_name
+    zamar_installation&.terminal_name
   end
 
   private

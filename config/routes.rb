@@ -17,15 +17,32 @@ Rails.application.routes.draw do
 
     # CUTE
     resources :cute_installations
-    resources :cute_equipments
+    resources :cute_equipments do
+      collection do
+        post :check_duplicate
+      end
+      member do
+        post :assign_to_installation
+        post :unassign_from_installation
+        get :audit_history
+      end
+    end
 
     # FIDS
     resources :fids_installations
-    resources :fids_equipments
+    resources :fids_equipments do
+      member do
+        get :audit_history
+      end
+    end
 
     # ZAMAR
     resources :zamar_installations
-    resources :zamar_equipments
+    resources :zamar_equipments do
+      member do
+        get :audit_history
+      end
+    end
 
     # Audit logs
     resources :audit_logs, only: [:index, :show]

@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :cute_equipment do
     association :user
     association :cute_installation
-    sequence(:equipment_type) { |n| "Type #{n}" }
+    equipment_type { CuteEquipment.equipment_types.keys.sample }
     sequence(:equipment_model) { |n| "Model #{n}" }
     sequence(:inventory_number) { |n| "INV-CUTE-#{n.to_s.rjust(5, '0')}" }
     sequence(:serial_number) { |n| "SN-#{n.to_s.rjust(8, '0')}" }
@@ -10,16 +10,16 @@ FactoryBot.define do
     note { Faker::Lorem.sentence }
     last_action_date { Time.current }
 
-    trait :inactive do
-      status { :inactive }
-    end
-
     trait :maintenance do
       status { :maintenance }
     end
 
-    trait :archived do
-      status { :archived }
+    trait :decommissioned do
+      status { :decommissioned }
+    end
+
+    trait :waiting_repair do
+      status { :waiting_repair }
     end
 
     trait :without_installation do

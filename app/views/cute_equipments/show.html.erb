@@ -82,9 +82,24 @@
           </dd>
         </div>
         <div>
+          <dt class="text-sm font-medium text-gray-500">Терминал</dt>
+          <dd class="mt-1">
+            <% if @equipment.terminal.present? %>
+              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                <%= @equipment.terminal_name %>
+              </span>
+            <% else %>
+              <span class="text-gray-400">—</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
           <dt class="text-sm font-medium text-gray-500">Место установки</dt>
           <dd class="mt-1 text-sm text-gray-900">
             <% if @equipment.cute_installation %>
+              <% if @equipment.terminal.present? %>
+                <span class="text-gray-500"><%= @equipment.terminal_name %>,</span>
+              <% end %>
               <%= link_to @equipment.cute_installation.name, cute_installation_path(@equipment.cute_installation), class: "text-blue-600 hover:text-blue-900" %>
             <% else %>
               <span class="text-gray-400">Не указано</span>
@@ -94,8 +109,20 @@
         <div>
           <dt class="text-sm font-medium text-gray-500">Последнее действие</dt>
           <dd class="mt-1 text-sm text-gray-900">
-            <% if @equipment.last_action_date %>
-              <%= l @equipment.last_action_date, format: :long %>
+            <% if @equipment.last_changed_by || @equipment.last_action_date %>
+              <div class="flex items-center">
+                <% if @equipment.last_changed_by %>
+                  <div class="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-2">
+                    <%= @equipment.last_changed_by.initials || '?' %>
+                  </div>
+                  <span class="font-medium"><%= @equipment.last_changed_by.full_name %></span>
+                  <% if @equipment.last_action_date %>
+                    <span class="text-gray-500 ml-1">• <%= format_datetime_ru(@equipment.last_action_date) %></span>
+                  <% end %>
+                <% elsif @equipment.last_action_date %>
+                  <%= format_datetime_ru(@equipment.last_action_date) %>
+                <% end %>
+              </div>
             <% else %>
               <span class="text-gray-400">—</span>
             <% end %>
@@ -110,7 +137,7 @@
   </div>
 
   <!-- System Info -->
-  <div class="bg-white shadow mt-6 rounded-lg">
+  <div class="bg-white shadow mt-6 rounded-lg mb-6">
     <div class="px-4 py-5 sm:p-6">
       <h3 class="text-lg font-medium text-gray-900 mb-4">Системная информация</h3>
       <dl class="grid grid-cols-1 sm:grid-cols-2" style="gap: 16px;">
@@ -122,26 +149,100 @@
           <dt class="text-sm font-medium text-gray-500">Обновлено</dt>
           <dd class="mt-1 text-sm text-gray-900"><%= l @equipment.updated_at, format: :long %></dd>
         </div>
-        <div class="sm:col-span-2">
-          <dt class="text-sm font-medium text-gray-500">Последнее изменение</dt>
-          <dd class="mt-1 text-sm text-gray-900">
-            <% last_audit = @equipment.audits.includes(:user).order(created_at: :desc).first %>
-            <% if last_audit && last_audit.user %>
-              <div class="flex items-center">
-                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
-                  <%= last_audit.user.initials || '?' %>
-                </div>
-                <div class="ml-2">
-                  <span class="font-medium"><%= last_audit.user.full_name %></span>
-                  <span class="text-gray-500">• <%= l last_audit.created_at, format: :long %></span>
-                </div>
-              </div>
-            <% else %>
-              <span class="text-gray-400">—</span>
-            <% end %>
-          </dd>
-        </div>
       </dl>
     </div>
   </div>
+
+  <!-- Audit History -->
+  <div class="bg-white shadow mt-6 rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">История изменений</h3>
+      
+      <div id="auditHistoryContainer" class="space-y-3">
+        <% @equipment.audits.includes(:user).order(created_at: :desc).limit(30).each do |audit| %>
+          <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-md">
+            <div class="flex-shrink-0">
+              <%= audit_action_icon(audit.action) %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-gray-900">
+                <%= format_audit_action(audit, CuteEquipment) %>
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                <% if audit.user %>
+                  <span class="font-medium"><%= audit.user.full_name %></span> • 
+                <% end %>
+                <%= format_datetime_ru(audit.created_at) %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+        
+        <% if @equipment.audits.count == 0 %>
+          <p class="text-gray-500 text-sm text-center py-4">История изменений пуста</p>
+        <% end %>
+      </div>
+      
+      <% if @equipment.audits.count > 30 %>
+        <div id="loadMoreContainer" class="mt-4 text-center">
+          <button type="button" 
+                  onclick="loadMoreAuditHistory()"
+                  id="loadMoreBtn"
+                  class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100">
+            Загрузить ещё
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
+
+<script>
+  let currentPage = 1;
+  const equipmentId = <%= @equipment.id %>;
+  
+  function loadMoreAuditHistory() {
+    currentPage++;
+    const btn = document.getElementById('loadMoreBtn');
+    btn.textContent = 'Загрузка...';
+    btn.disabled = true;
+    
+    fetch(`/cute_equipments/${equipmentId}/audit_history?page=${currentPage}`)
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('auditHistoryContainer');
+        
+        data.audits.forEach(audit => {
+          const auditHtml = `
+            <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-md">
+              <div class="flex-shrink-0">
+                ${audit.action_icon}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-gray-900">${audit.action_text}</p>
+                <p class="text-xs text-gray-500 mt-1">
+                  <span class="font-medium">${audit.user_name}</span> • ${audit.created_at}
+                </p>
+              </div>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', auditHtml);
+        });
+        
+        if (!data.has_more) {
+          document.getElementById('loadMoreContainer').style.display = 'none';
+        } else {
+          btn.textContent = 'Загрузить ещё';
+          btn.disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error loading audit history:', error);
+        btn.textContent = 'Ошибка загрузки';
+        setTimeout(() => {
+          btn.textContent = 'Загрузить ещё';
+          btn.disabled = false;
+        }, 2000);
+      });
+  }
+</script>

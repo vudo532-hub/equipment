@@ -1,13 +1,42 @@
 class CuteEquipmentsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_equipment, only: [:show, :edit, :update, :destroy]
+  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
   before_action :require_delete_permission, only: [:destroy]
 
   def index
     @q = CuteEquipment.ransack(params[:q])
     @q.sorts = "created_at desc" if @q.sorts.empty?
-    @equipments = @q.result(distinct: true).includes(:cute_installation)
+    
+    equipments = @q.result(distinct: true).includes(:cute_installation)
+    
+    # Filter by terminal if specified
+    if params[:terminal].present?
+      installation_ids = CuteInstallation.where(terminal: params[:terminal]).pluck(:id)
+      equipments = equipments.where(cute_installation_id: installation_ids)
+    end
+    
+    # Filter unassigned for JSON API
+    if params[:unassigned] == "true"
+      equipments = equipments.unassigned
+    end
+    
+    @equipments = equipments
     @installations = CuteInstallation.ordered
+    
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: @equipments.map { |e|
+          {
+            id: e.id,
+            equipment_type: e.equipment_type,
+            equipment_type_text: e.equipment_type_text,
+            inventory_number: e.inventory_number,
+            equipment_model: e.equipment_model
+          }
+        }
+      end
+    end
   end
 
   def show
@@ -23,6 +52,7 @@ class CuteEquipmentsController < ApplicationController
     @equipment = CuteEquipment.new(equipment_params)
     @equipment.user = current_user
     @equipment.last_changed_by = current_user
+    @equipment.current_user_admin = current_user.admin?
 
     if @equipment.save
       redirect_to cute_equipments_path, notice: t("flash.created", resource: CuteEquipment.model_name.human)
@@ -38,6 +68,8 @@ class CuteEquipmentsController < ApplicationController
 
   def update
     @equipment.last_changed_by = current_user
+    @equipment.current_user_admin = current_user.admin?
+    
     if @equipment.update(equipment_params)
       redirect_to cute_equipment_path(@equipment), notice: t("flash.updated", resource: CuteEquipment.model_name.human)
     else
@@ -51,6 +83,84 @@ class CuteEquipmentsController < ApplicationController
     redirect_to cute_equipments_path, notice: t("flash.deleted", resource: CuteEquipment.model_name.human)
   end
 
+  # AJAX endpoint для проверки дублирования оборудования
+  def check_duplicate
+    equipment_type = params[:equipment_type]
+    installation_id = params[:installation_id]
+    exclude_id = params[:exclude_id]
+
+    duplicate = CuteEquipment.find_duplicate(equipment_type, installation_id, exclude_id)
+
+    if duplicate
+      render json: {
+        duplicate: true,
+        equipment: {
+          id: duplicate.id,
+          inventory_number: duplicate.inventory_number,
+          serial_number: duplicate.serial_number,
+          status: duplicate.status_text,
+          equipment_type: duplicate.equipment_type_text
+        }
+      }
+    else
+      render json: { duplicate: false }
+    end
+  end
+
+  # AJAX endpoint для привязки оборудования к месту
+  def assign_to_installation
+    installation = CuteInstallation.find(params[:installation_id])
+    
+    @equipment.cute_installation = installation
+    @equipment.last_changed_by = current_user
+    @equipment.current_user_admin = current_user.admin?
+
+    if @equipment.save
+      render json: { success: true, message: "Оборудование успешно привязано" }
+    else
+      render json: { success: false, errors: @equipment.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  # AJAX endpoint для отвязки оборудования от места
+  def unassign_from_installation
+    @equipment.cute_installation = nil
+    @equipment.last_changed_by = current_user
+
+    if @equipment.save
+      render json: { success: true, message: "Оборудование успешно отвязано" }
+    else
+      render json: { success: false, errors: @equipment.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  # AJAX endpoint для истории изменений
+  def audit_history
+    page = (params[:page] || 1).to_i
+    per_page = 30
+    offset = (page - 1) * per_page
+    
+    audits = @equipment.audits.includes(:user).order(created_at: :desc).offset(offset).limit(per_page)
+    total_count = @equipment.audits.count
+    has_more = (offset + per_page) < total_count
+    
+    render json: {
+      audits: audits.map { |audit|
+        {
+          id: audit.id,
+          action: audit.action,
+          action_text: helpers.format_audit_action(audit, CuteEquipment),
+          action_icon: helpers.audit_action_icon(audit.action),
+          user_name: audit.user&.full_name || "Система",
+          user_initials: audit.user&.initials || "?",
+          created_at: helpers.format_datetime_ru(audit.created_at)
+        }
+      },
+      has_more: has_more,
+      page: page
+    }
+  end
+
   private
 
   def set_equipment
@@ -60,7 +170,7 @@ class CuteEquipmentsController < ApplicationController
   def equipment_params
     params.require(:cute_equipment).permit(
       :name, :equipment_type, :equipment_model, :serial_number,
-      :inventory_number, :status, :notes, :cute_installation_id
+      :inventory_number, :status, :note, :cute_installation_id
     )
   end
 end

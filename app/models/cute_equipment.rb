@@ -7,6 +7,9 @@ class CuteEquipment < ApplicationRecord
   belongs_to :cute_installation, optional: true
   belongs_to :last_changed_by, class_name: "User", optional: true
 
+  # Virtual attribute for validation context
+  attr_accessor :current_user_admin
+
   # Enums
   enum :equipment_type, {
     boarding_pass_printer: 0,
@@ -18,7 +21,7 @@ class CuteEquipment < ApplicationRecord
     monitor: 6,
     computer: 7,
     other: 99
-  }, prefix: true
+  }
 
   enum :status, {
     active: 0,
@@ -38,6 +41,7 @@ class CuteEquipment < ApplicationRecord
                                uniqueness: { message: "уже существует" }
   validates :serial_number, length: { maximum: 100 }
   validates :note, length: { maximum: 2000 }
+  validate :unique_equipment_type_per_installation, unless: :current_user_admin
 
   # Scopes
   scope :ordered, -> { order(last_action_date: :desc, created_at: :desc) }
@@ -45,6 +49,7 @@ class CuteEquipment < ApplicationRecord
   scope :by_type, ->(type) { where(equipment_type: type) if type.present? }
   scope :by_installation, ->(installation_id) { where(cute_installation_id: installation_id) if installation_id.present? }
   scope :not_decommissioned, -> { where.not(status: :decommissioned) }
+  scope :unassigned, -> { where(cute_installation_id: nil) }
   scope :search, ->(query) {
     return all if query.blank?
     where("equipment_model ILIKE :q OR inventory_number ILIKE :q OR serial_number ILIKE :q", q: "%#{query}%")
@@ -60,6 +65,7 @@ class CuteEquipment < ApplicationRecord
   end
 
   def equipment_type_text
+    return "—" if equipment_type.blank?
     I18n.t("cute_equipment_types.#{equipment_type}", default: equipment_type.to_s.humanize)
   end
 
@@ -77,6 +83,7 @@ class CuteEquipment < ApplicationRecord
   end
 
   def status_text
+    return "—" if status.blank?
     I18n.t("equipment_statuses.#{status}", default: status.to_s.humanize)
   end
 
@@ -89,9 +96,36 @@ class CuteEquipment < ApplicationRecord
     %w[cute_installation last_changed_by]
   end
 
+  # Терминал через место установки
+  def terminal
+    cute_installation&.terminal
+  end
+
+  def terminal_name
+    cute_installation&.terminal_name
+  end
+
+  # Поиск дублирующего оборудования того же типа на месте установки
+  def self.find_duplicate(equipment_type, installation_id, exclude_id = nil)
+    return nil if installation_id.blank?
+    
+    scope = where(equipment_type: equipment_type, cute_installation_id: installation_id)
+    scope = scope.where.not(id: exclude_id) if exclude_id.present?
+    scope.first
+  end
+
   private
 
   def update_last_action_date
     self.last_action_date = Time.current if changed?
+  end
+
+  def unique_equipment_type_per_installation
+    return if cute_installation_id.blank?
+    
+    duplicate = self.class.find_duplicate(equipment_type, cute_installation_id, id)
+    if duplicate.present?
+      errors.add(:base, "Оборудование типа '#{equipment_type_text}' уже привязано к этому месту установки (инв. №#{duplicate.inventory_number})")
+    end
   end
 end

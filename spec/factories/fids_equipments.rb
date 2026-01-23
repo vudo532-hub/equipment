@@ -10,16 +10,12 @@ FactoryBot.define do
     note { Faker::Lorem.sentence }
     last_action_date { Time.current }
 
-    trait :inactive do
-      status { :inactive }
-    end
-
     trait :maintenance do
       status { :maintenance }
     end
 
-    trait :archived do
-      status { :archived }
+    trait :decommissioned do
+      status { :decommissioned }
     end
 
     trait :without_installation do

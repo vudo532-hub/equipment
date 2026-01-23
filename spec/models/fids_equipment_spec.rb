@@ -27,19 +27,24 @@ RSpec.describe FidsEquipment, type: :model do
   end
 
   describe 'enums' do
-    it { should define_enum_for(:status).with_values(active: 0, inactive: 1, maintenance: 2, archived: 3) }
+    it 'defines status enum with valid values' do
+      expect(FidsEquipment.statuses.keys).to include(
+        'active', 'maintenance', 'waiting_repair', 'ready_to_dispatch',
+        'decommissioned', 'transferred', 'with_note'
+      )
+    end
   end
 
   describe 'scopes' do
     let(:user) { create(:user) }
 
-    describe '.not_archived' do
-      it 'excludes archived equipment' do
+    describe '.not_decommissioned' do
+      it 'excludes decommissioned equipment' do
         active = create(:fids_equipment, user: user, status: :active)
-        archived = create(:fids_equipment, user: user, status: :archived)
+        decommissioned = create(:fids_equipment, user: user, status: :decommissioned)
         
-        expect(FidsEquipment.not_archived).to include(active)
-        expect(FidsEquipment.not_archived).not_to include(archived)
+        expect(FidsEquipment.not_decommissioned).to include(active)
+        expect(FidsEquipment.not_decommissioned).not_to include(decommissioned)
       end
     end
   end

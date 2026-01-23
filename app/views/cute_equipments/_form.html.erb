@@ -87,7 +87,20 @@
         <%= f.select :cute_installation_id,
             options_for_select(@installations.map { |i| [i.name, i.id] }, equipment.cute_installation_id),
             { include_blank: "Не указано" },
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+            id: "cute_equipment_cute_installation_id" %>
+      </div>
+    </div>
+
+    <!-- Предупреждение о дубликате -->
+    <div id="duplicateWarning" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+      <div class="flex">
+        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm text-yellow-700" id="duplicateWarningText"></p>
+        </div>
       </div>
     </div>
 
@@ -110,3 +123,58 @@
         class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>
   </div>
 <% end %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const equipmentTypeSelect = document.getElementById('cute_equipment_equipment_type');
+  const installationSelect = document.getElementById('cute_equipment_cute_installation_id');
+  const equipmentId = <%= equipment.persisted? ? equipment.id : 'null' %>;
+  
+  function checkDuplicate() {
+    const equipmentType = equipmentTypeSelect.value;
+    const installationId = installationSelect.value;
+    const warning = document.getElementById('duplicateWarning');
+    const warningText = document.getElementById('duplicateWarningText');
+    
+    if (!equipmentType || !installationId) {
+      warning.classList.add('hidden');
+      return;
+    }
+    
+    fetch('/cute_equipments/check_duplicate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        equipment_type: equipmentType,
+        installation_id: installationId,
+        exclude_id: equipmentId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.duplicate) {
+        warningText.textContent = `Внимание: оборудование типа "${data.equipment.equipment_type}" уже привязано к этому месту установки (инв. №${data.equipment.inventory_number}, статус: ${data.equipment.status})`;
+        warning.classList.remove('hidden');
+      } else {
+        warning.classList.add('hidden');
+      }
+    })
+    .catch(error => {
+      console.error('Error checking duplicate:', error);
+    });
+  }
+  
+  if (equipmentTypeSelect && installationSelect) {
+    equipmentTypeSelect.addEventListener('change', checkDuplicate);
+    installationSelect.addEventListener('change', checkDuplicate);
+    
+    // Check on load if editing existing equipment
+    if (equipmentId && equipmentTypeSelect.value && installationSelect.value) {
+      checkDuplicate();
+    }
+  }
+});
+</script>

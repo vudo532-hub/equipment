@@ -61,6 +61,7 @@ class FidsEquipment < ApplicationRecord
   end
 
   def status_text
+    return "—" if status.blank?
     I18n.t("equipment_statuses.#{status}", default: status.to_s.humanize)
   end
 
@@ -71,6 +72,15 @@ class FidsEquipment < ApplicationRecord
 
   def self.ransackable_associations(auth_object = nil)
     %w[fids_installation last_changed_by]
+  end
+
+  # Терминал через место установки
+  def terminal
+    fids_installation&.terminal
+  end
+
+  def terminal_name
+    fids_installation&.terminal_name
   end
 
   private
