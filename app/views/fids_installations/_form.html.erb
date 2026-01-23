@@ -18,6 +18,21 @@
   </div>
 
   <div>
+    <%= form.label :terminal, "Терминал", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.select :terminal, 
+        [
+          ["Терминал A", "terminal_a"],
+          ["Терминал B", "terminal_b"],
+          ["Терминал C", "terminal_c"],
+          ["Терминал D", "terminal_d"],
+          ["Терминал E", "terminal_e"],
+          ["Терминал F", "terminal_f"]
+        ],
+        { prompt: "Выберите терминал" },
+        class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" %>
+  </div>
+
+  <div>
     <%= form.label :installation_type, "Тип установки", class: "block text-sm font-medium text-gray-700" %>
     <%= form.select :installation_type, 
         [
@@ -40,14 +55,6 @@
         class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500",
         placeholder: "Например: FIDS-B12-01" %>
     <p class="mt-1 text-sm text-gray-500">Уникальный идентификатор для системы</p>
-  </div>
-
-  <div>
-    <%= form.label :description, "Описание", class: "block text-sm font-medium text-gray-700" %>
-    <%= form.text_area :description,
-        rows: 4,
-        class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500",
-        placeholder: "Дополнительная информация о месте установки..." %>
   </div>
 
   <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">

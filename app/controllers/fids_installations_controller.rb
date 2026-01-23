@@ -1,9 +1,10 @@
 class FidsInstallationsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_installation, only: [:show, :edit, :update, :destroy]
+  before_action :require_delete_permission, only: [:destroy]
 
   def index
-    @q = current_user.fids_installations.ransack(params[:q])
+    @q = FidsInstallation.ransack(params[:q])
     @q.sorts = "name asc" if @q.sorts.empty?
     @installations = @q.result(distinct: true).includes(:fids_equipments)
   end
@@ -13,11 +14,12 @@ class FidsInstallationsController < ApplicationController
   end
 
   def new
-    @installation = current_user.fids_installations.build
+    @installation = FidsInstallation.new
   end
 
   def create
-    @installation = current_user.fids_installations.build(installation_params)
+    @installation = FidsInstallation.new(installation_params)
+    @installation.user = current_user
 
     if @installation.save
       redirect_to fids_installations_path, notice: t("flash.created", resource: FidsInstallation.model_name.human)
@@ -45,10 +47,10 @@ class FidsInstallationsController < ApplicationController
   private
 
   def set_installation
-    @installation = current_user.fids_installations.find(params[:id])
+    @installation = FidsInstallation.find(params[:id])
   end
 
   def installation_params
-    params.require(:fids_installation).permit(:name, :installation_type, :identifier)
+    params.require(:fids_installation).permit(:name, :installation_type, :identifier, :terminal)
   end
 end

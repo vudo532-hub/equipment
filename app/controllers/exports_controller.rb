@@ -2,7 +2,7 @@ class ExportsController < ApplicationController
   before_action :authenticate_user!
 
   def cute_equipments
-    @equipments = current_user.cute_equipments.includes(:cute_installation).ordered
+    @equipments = CuteEquipment.includes(:cute_installation).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -13,7 +13,7 @@ class ExportsController < ApplicationController
   end
 
   def fids_equipments
-    @equipments = current_user.fids_equipments.includes(:fids_installation).ordered
+    @equipments = FidsEquipment.includes(:fids_installation).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -23,8 +23,19 @@ class ExportsController < ApplicationController
     end
   end
 
+  def zamar_equipments
+    @equipments = ZamarEquipment.includes(:zamar_installation).ordered
+    
+    respond_to do |format|
+      format.xlsx {
+        render xlsx: "zamar_equipments", 
+               filename: "zamar_equipment_#{Date.current.strftime('%Y%m%d')}.xlsx"
+      }
+    end
+  end
+
   def cute_installations
-    @installations = current_user.cute_installations.includes(:cute_equipments).ordered
+    @installations = CuteInstallation.includes(:cute_equipments).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -35,12 +46,23 @@ class ExportsController < ApplicationController
   end
 
   def fids_installations
-    @installations = current_user.fids_installations.includes(:fids_equipments).ordered
+    @installations = FidsInstallation.includes(:fids_equipments).ordered
     
     respond_to do |format|
       format.xlsx {
         render xlsx: "fids_installations", 
                filename: "fids_installations_#{Date.current.strftime('%Y%m%d')}.xlsx"
+      }
+    end
+  end
+
+  def zamar_installations
+    @installations = ZamarInstallation.includes(:zamar_equipments).ordered
+    
+    respond_to do |format|
+      format.xlsx {
+        render xlsx: "zamar_installations", 
+               filename: "zamar_installations_#{Date.current.strftime('%Y%m%d')}.xlsx"
       }
     end
   end

@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe CuteEquipment, type: :model do
   describe 'associations' do
-    it { should belong_to(:user) }
+    it { should belong_to(:user).optional }
     it { should belong_to(:cute_installation).optional }
   end
 
@@ -19,20 +19,11 @@ RSpec.describe CuteEquipment, type: :model do
     it { should validate_length_of(:serial_number).is_at_most(100) }
     it { should validate_length_of(:note).is_at_most(2000) }
 
-    it 'validates uniqueness of inventory_number within user scope' do
-      user = create(:user)
-      create(:cute_equipment, user: user, inventory_number: 'INV-001')
-      duplicate = build(:cute_equipment, user: user, inventory_number: 'INV-001')
+    it 'validates uniqueness of inventory_number globally' do
+      create(:cute_equipment, inventory_number: 'INV-001')
+      duplicate = build(:cute_equipment, inventory_number: 'INV-001')
       expect(duplicate).not_to be_valid
       expect(duplicate.errors[:inventory_number]).to include('уже существует')
-    end
-
-    it 'allows same inventory_number for different users' do
-      user1 = create(:user)
-      user2 = create(:user)
-      create(:cute_equipment, user: user1, inventory_number: 'INV-001')
-      equipment = build(:cute_equipment, user: user2, inventory_number: 'INV-001')
-      expect(equipment).to be_valid
     end
   end
 
@@ -41,12 +32,10 @@ RSpec.describe CuteEquipment, type: :model do
   end
 
   describe 'scopes' do
-    let(:user) { create(:user) }
-
     describe '.not_archived' do
       it 'excludes archived equipment' do
-        active = create(:cute_equipment, user: user, status: :active)
-        archived = create(:cute_equipment, user: user, status: :archived)
+        active = create(:cute_equipment, status: :active)
+        archived = create(:cute_equipment, status: :archived)
         
         expect(CuteEquipment.not_archived).to include(active)
         expect(CuteEquipment.not_archived).not_to include(archived)
@@ -55,8 +44,8 @@ RSpec.describe CuteEquipment, type: :model do
 
     describe '.by_status' do
       it 'filters by status' do
-        active = create(:cute_equipment, user: user, status: :active)
-        inactive = create(:cute_equipment, user: user, status: :inactive)
+        active = create(:cute_equipment, status: :active)
+        inactive = create(:cute_equipment, status: :inactive)
         
         expect(CuteEquipment.by_status(:active)).to include(active)
         expect(CuteEquipment.by_status(:active)).not_to include(inactive)
@@ -65,16 +54,16 @@ RSpec.describe CuteEquipment, type: :model do
 
     describe '.search' do
       it 'searches by equipment_type' do
-        eq1 = create(:cute_equipment, user: user, equipment_type: 'Printer')
-        eq2 = create(:cute_equipment, user: user, equipment_type: 'Scanner')
+        eq1 = create(:cute_equipment, equipment_type: 'Printer')
+        eq2 = create(:cute_equipment, equipment_type: 'Scanner')
         
         expect(CuteEquipment.search('Printer')).to include(eq1)
         expect(CuteEquipment.search('Printer')).not_to include(eq2)
       end
 
       it 'searches by inventory_number' do
-        eq1 = create(:cute_equipment, user: user, inventory_number: 'ABC-123')
-        eq2 = create(:cute_equipment, user: user, inventory_number: 'XYZ-789')
+        eq1 = create(:cute_equipment, inventory_number: 'ABC-123')
+        eq2 = create(:cute_equipment, inventory_number: 'XYZ-789')
         
         expect(CuteEquipment.search('ABC')).to include(eq1)
         expect(CuteEquipment.search('ABC')).not_to include(eq2)

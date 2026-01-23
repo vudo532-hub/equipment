@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe FidsEquipment, type: :model do
   describe 'associations' do
-    it { should belong_to(:user) }
+    it { should belong_to(:user).optional }
     it { should belong_to(:fids_installation).optional }
   end
 
@@ -18,6 +18,12 @@ RSpec.describe FidsEquipment, type: :model do
     it { should validate_length_of(:equipment_model).is_at_most(255) }
     it { should validate_length_of(:serial_number).is_at_most(100) }
     it { should validate_length_of(:note).is_at_most(2000) }
+
+    it 'validates uniqueness of inventory_number globally' do
+      create(:fids_equipment, inventory_number: 'INV-001')
+      equipment = build(:fids_equipment, inventory_number: 'INV-001')
+      expect(equipment).not_to be_valid
+    end
   end
 
   describe 'enums' do

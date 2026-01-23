@@ -1,43 +1,47 @@
 class CuteEquipmentsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_equipment, only: [:show, :edit, :update, :destroy]
+  before_action :require_delete_permission, only: [:destroy]
 
   def index
-    @q = current_user.cute_equipments.ransack(params[:q])
+    @q = CuteEquipment.ransack(params[:q])
     @q.sorts = "created_at desc" if @q.sorts.empty?
     @equipments = @q.result(distinct: true).includes(:cute_installation)
-    @installations = current_user.cute_installations.ordered
+    @installations = CuteInstallation.ordered
   end
 
   def show
   end
 
   def new
-    @equipment = current_user.cute_equipments.build
+    @equipment = CuteEquipment.new
     @equipment.cute_installation_id = params[:cute_installation_id] if params[:cute_installation_id].present?
-    @installations = current_user.cute_installations.ordered
+    @installations = CuteInstallation.ordered
   end
 
   def create
-    @equipment = current_user.cute_equipments.build(equipment_params)
+    @equipment = CuteEquipment.new(equipment_params)
+    @equipment.user = current_user
+    @equipment.last_changed_by = current_user
 
     if @equipment.save
       redirect_to cute_equipments_path, notice: t("flash.created", resource: CuteEquipment.model_name.human)
     else
-      @installations = current_user.cute_installations.ordered
+      @installations = CuteInstallation.ordered
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    @installations = current_user.cute_installations.ordered
+    @installations = CuteInstallation.ordered
   end
 
   def update
+    @equipment.last_changed_by = current_user
     if @equipment.update(equipment_params)
       redirect_to cute_equipment_path(@equipment), notice: t("flash.updated", resource: CuteEquipment.model_name.human)
     else
-      @installations = current_user.cute_installations.ordered
+      @installations = CuteInstallation.ordered
       render :edit, status: :unprocessable_entity
     end
   end
@@ -50,7 +54,7 @@ class CuteEquipmentsController < ApplicationController
   private
 
   def set_equipment
-    @equipment = current_user.cute_equipments.find(params[:id])
+    @equipment = CuteEquipment.find(params[:id])
   end
 
   def equipment_params

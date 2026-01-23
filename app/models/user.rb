@@ -13,10 +13,10 @@ class User < ApplicationRecord
   }, default: :viewer
 
   # Associations
-  has_many :cute_installations, dependent: :destroy
-  has_many :fids_installations, dependent: :destroy
-  has_many :cute_equipments, dependent: :destroy
-  has_many :fids_equipments, dependent: :destroy
+  has_many :cute_installations, dependent: :nullify
+  has_many :fids_installations, dependent: :nullify
+  has_many :cute_equipments, dependent: :nullify
+  has_many :fids_equipments, dependent: :nullify
   has_many :api_tokens, dependent: :destroy
 
   # Validations

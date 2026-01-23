@@ -12,11 +12,11 @@
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "mt-8 space-y-6" }) do |f| %>
-      <div class="rounded-md shadow-sm space-y-4">
-        <div class="grid grid-cols-2 gap-4">
+      <div class="rounded-md shadow-sm space-y-4 p-5 bg-white">
+        <div class="grid grid-cols-2" style="gap: 16px;">
           <div>
             <%= f.input :first_name,
-                        required: true,
+                        required: false,
                         autofocus: true,
                         label: "Имя",
                         input_html: { 
@@ -27,7 +27,7 @@
           </div>
           <div>
             <%= f.input :last_name,
-                        required: true,
+                        required: false,
                         label: "Фамилия",
                         input_html: { 
                           autocomplete: "family-name",
@@ -38,7 +38,7 @@
         </div>
         <div>
           <%= f.input :email,
-                      required: true,
+                      required: false,
                       label: "Email",
                       input_html: { 
                         autocomplete: "email",
@@ -48,9 +48,9 @@
         </div>
         <div>
           <%= f.input :password,
-                      required: true,
+                      required: false,
                       label: "Пароль",
-                      hint: ("Минимум #{@minimum_password_length} символов" if @minimum_password_length),
+                      hint: ("Минимум #{@minimum_password_length} символов, заглавные и строчные буквы, цифры" if @minimum_password_length),
                       input_html: { 
                         autocomplete: "new-password",
                         class: "appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
@@ -60,7 +60,7 @@
         </div>
         <div>
           <%= f.input :password_confirmation,
-                      required: true,
+                      required: false,
                       label: "Подтверждение пароля",
                       input_html: { 
                         autocomplete: "new-password",

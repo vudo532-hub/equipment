@@ -23,6 +23,10 @@ Rails.application.routes.draw do
     resources :fids_installations
     resources :fids_equipments
 
+    # ZAMAR
+    resources :zamar_installations
+    resources :zamar_equipments
+
     # Audit logs
     resources :audit_logs, only: [:index, :show]
 
@@ -31,6 +35,8 @@ Rails.application.routes.draw do
     get "export/fids_equipments", to: "exports#fids_equipments", as: :export_fids_equipments
     get "export/cute_installations", to: "exports#cute_installations", as: :export_cute_installations
     get "export/fids_installations", to: "exports#fids_installations", as: :export_fids_installations
+    get "export/zamar_equipments", to: "exports#zamar_equipments", as: :export_zamar_equipments
+    get "export/zamar_installations", to: "exports#zamar_installations", as: :export_zamar_installations
 
     # API Tokens management
     resources :api_tokens, only: [:index, :create, :destroy]
@@ -46,8 +52,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :cute_installations, only: [:index, :show, :create, :update, :destroy]
       resources :fids_installations, only: [:index, :show, :create, :update, :destroy]
+      resources :zamar_installations, only: [:index, :show, :create, :update, :destroy]
       resources :cute_equipments, only: [:index, :show, :create, :update, :destroy]
       resources :fids_equipments, only: [:index, :show, :create, :update, :destroy]
+      resources :zamar_equipments, only: [:index, :show, :create, :update, :destroy]
     end
   end
 end

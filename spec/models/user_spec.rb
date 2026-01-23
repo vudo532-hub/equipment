@@ -4,10 +4,10 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   describe 'associations' do
-    it { should have_many(:cute_installations).dependent(:destroy) }
-    it { should have_many(:fids_installations).dependent(:destroy) }
-    it { should have_many(:cute_equipments).dependent(:destroy) }
-    it { should have_many(:fids_equipments).dependent(:destroy) }
+    it { should have_many(:cute_installations).dependent(:nullify) }
+    it { should have_many(:fids_installations).dependent(:nullify) }
+    it { should have_many(:cute_equipments).dependent(:nullify) }
+    it { should have_many(:fids_equipments).dependent(:nullify) }
     it { should have_many(:api_tokens).dependent(:destroy) }
   end
 

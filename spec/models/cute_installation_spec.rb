@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe CuteInstallation, type: :model do
   describe 'associations' do
-    it { should belong_to(:user) }
+    it { should belong_to(:user).optional }
     it { should have_many(:cute_equipments).dependent(:nullify) }
   end
 
@@ -17,29 +17,18 @@ RSpec.describe CuteInstallation, type: :model do
     it { should validate_length_of(:installation_type).is_at_most(100) }
     it { should validate_length_of(:identifier).is_at_most(100) }
 
-    it 'validates uniqueness of identifier within user scope' do
-      user = create(:user)
-      create(:cute_installation, user: user, identifier: 'ID-001')
-      duplicate = build(:cute_installation, user: user, identifier: 'ID-001')
+    it 'validates uniqueness of identifier globally' do
+      create(:cute_installation, identifier: 'ID-001')
+      duplicate = build(:cute_installation, identifier: 'ID-001')
       expect(duplicate).not_to be_valid
-    end
-
-    it 'allows same identifier for different users' do
-      user1 = create(:user)
-      user2 = create(:user)
-      create(:cute_installation, user: user1, identifier: 'ID-001')
-      installation = build(:cute_installation, user: user2, identifier: 'ID-001')
-      expect(installation).to be_valid
     end
   end
 
   describe 'scopes' do
-    let(:user) { create(:user) }
-
     describe '.ordered' do
       it 'orders by name' do
-        z_install = create(:cute_installation, user: user, name: 'Zebra')
-        a_install = create(:cute_installation, user: user, name: 'Alpha')
+        z_install = create(:cute_installation, name: 'Zebra')
+        a_install = create(:cute_installation, name: 'Alpha')
         
         expect(CuteInstallation.ordered.first).to eq(a_install)
       end
@@ -47,8 +36,8 @@ RSpec.describe CuteInstallation, type: :model do
 
     describe '.by_type' do
       it 'filters by installation_type' do
-        terminal = create(:cute_installation, user: user, installation_type: 'Terminal')
-        gate = create(:cute_installation, user: user, installation_type: 'Gate')
+        terminal = create(:cute_installation, installation_type: 'Terminal')
+        gate = create(:cute_installation, installation_type: 'Gate')
         
         expect(CuteInstallation.by_type('Terminal')).to include(terminal)
         expect(CuteInstallation.by_type('Terminal')).not_to include(gate)
@@ -57,7 +46,7 @@ RSpec.describe CuteInstallation, type: :model do
 
     describe '.search_by_name' do
       it 'searches by name (case insensitive)' do
-        install = create(:cute_installation, user: user, name: 'Terminal A')
+        install = create(:cute_installation, name: 'Terminal A')
         
         expect(CuteInstallation.search_by_name('terminal')).to include(install)
         expect(CuteInstallation.search_by_name('TERMINAL')).to include(install)
@@ -74,9 +63,8 @@ RSpec.describe CuteInstallation, type: :model do
 
   describe '#equipment_count' do
     it 'returns count of associated equipments' do
-      user = create(:user)
-      installation = create(:cute_installation, user: user)
-      create_list(:cute_equipment, 3, user: user, cute_installation: installation)
+      installation = create(:cute_installation)
+      create_list(:cute_equipment, 3, cute_installation: installation)
       
       expect(installation.equipment_count).to eq(3)
     end

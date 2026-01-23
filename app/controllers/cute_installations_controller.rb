@@ -1,9 +1,10 @@
 class CuteInstallationsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_installation, only: [:show, :edit, :update, :destroy]
+  before_action :require_delete_permission, only: [:destroy]
 
   def index
-    @q = current_user.cute_installations.ransack(params[:q])
+    @q = CuteInstallation.ransack(params[:q])
     @q.sorts = "name asc" if @q.sorts.empty?
     @installations = @q.result(distinct: true).includes(:cute_equipments)
   end
@@ -13,11 +14,12 @@ class CuteInstallationsController < ApplicationController
   end
 
   def new
-    @installation = current_user.cute_installations.build
+    @installation = CuteInstallation.new
   end
 
   def create
-    @installation = current_user.cute_installations.build(installation_params)
+    @installation = CuteInstallation.new(installation_params)
+    @installation.user = current_user
 
     if @installation.save
       redirect_to cute_installations_path, notice: t("flash.created", resource: CuteInstallation.model_name.human)
@@ -45,10 +47,10 @@ class CuteInstallationsController < ApplicationController
   private
 
   def set_installation
-    @installation = current_user.cute_installations.find(params[:id])
+    @installation = CuteInstallation.find(params[:id])
   end
 
   def installation_params
-    params.require(:cute_installation).permit(:name, :installation_type, :identifier)
+    params.require(:cute_installation).permit(:name, :installation_type, :identifier, :terminal)
   end
 end

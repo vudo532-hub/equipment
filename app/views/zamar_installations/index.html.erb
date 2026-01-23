@@ -1,0 +1,144 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Места установки ZAMAR</h1>
+      <p class="mt-1 text-sm text-gray-600">Управление местами установки оборудования ZAMAR</p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to export_zamar_installations_path(format: :xlsx), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Экспорт Excel
+      <% end %>
+      <%= link_to new_zamar_installation_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Добавить место
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="bg-white shadow rounded-lg mb-6 p-4">
+    <%= search_form_for @q, url: zamar_installations_path, method: :get, html: { class: "flex gap-4 items-end flex-wrap" } do |f| %>
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Поиск</label>
+        <%= f.search_field :name_or_identifier_cont,
+            placeholder: "Поиск по названию или идентификатору...",
+            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+      <div class="min-w-[150px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Терминал</label>
+        <%= f.select :terminal_eq,
+            options_for_select([
+              ["Все терминалы", ""],
+              ["Терминал A", "terminal_a"],
+              ["Терминал B", "terminal_b"],
+              ["Терминал C", "terminal_c"],
+              ["Терминал D", "terminal_d"],
+              ["Терминал E", "terminal_e"],
+              ["Терминал F", "terminal_f"]
+            ], @q.terminal_eq),
+            {},
+            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+      <div class="min-w-[180px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Тип</label>
+        <%= f.select :installation_type_eq,
+            options_for_select([
+              ["Все типы", ""],
+              ["DSM", "DSM"],
+              ["DBA", "DBA"],
+              ["SBDO", "SBDO"],
+              ["Gates", "Gates"],
+              ["Другое", "Другое"]
+            ], @q.installation_type_eq),
+            {},
+            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+      <div class="flex gap-2">
+        <%= f.submit "Поиск", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer" %>
+        <%= link_to "Сбросить", zamar_installations_path, class: "px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <% if @installations.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Название</th>
+            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Терминал</th>
+            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Тип</th>
+            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Идентификатор</th>
+            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: left;">Оборудование</th>
+            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider" style="text-align: right;">Действия</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @installations.each do |installation| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap" style="cursor: pointer;" onclick="window.location='<%= zamar_installation_path(installation) %>'">
+                <div class="text-sm font-medium text-gray-900"><%= installation.name %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if installation.terminal.present? %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                    <%= installation.terminal_name %>
+                  </span>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                  <%= installation.installation_type %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= installation.identifier || "—" %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= installation.equipment_count %> шт.
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" style="text-align: right;">
+                <%= link_to "Изменить", edit_zamar_installation_path(installation), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                <% if can_delete? %>
+                  <%= link_to "Удалить", zamar_installation_path(installation), 
+                      data: { turbo_method: :delete, turbo_confirm: "Вы уверены, что хотите удалить это место установки?" },
+                      class: "text-red-600 hover:text-red-900" %>
+                <% else %>
+                  <%= link_to "Удалить", "#", 
+                      onclick: "alert('Удаление недоступно для вашей роли'); return false;",
+                      class: "text-gray-400", style: "cursor: not-allowed;" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Нет мест установки</h3>
+        <p class="mt-1 text-sm text-gray-500">Начните с добавления нового места установки.</p>
+        <div class="mt-6">
+          <%= link_to new_zamar_installation_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Добавить место
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

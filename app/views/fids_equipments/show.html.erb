@@ -8,13 +8,13 @@
           <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
           </svg>
-          <span class="ml-2 text-gray-700"><%= @equipment.name %></span>
+          <span class="ml-2 text-gray-700"><%= @equipment.equipment_type %></span>
         </li>
       </ol>
     </nav>
     <div class="flex justify-between items-start">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900"><%= @equipment.name %></h1>
+        <h1 class="text-2xl font-bold text-gray-900"><%= @equipment.equipment_type %></h1>
         <div class="mt-2 flex items-center space-x-4">
           <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full <%= @equipment.status_color %>">
             <%= @equipment.status_text %>
@@ -29,13 +29,24 @@
           </svg>
           Редактировать
         <% end %>
-        <%= link_to fids_equipment_path(@equipment),
-            data: { turbo_method: :delete, turbo_confirm: "Вы уверены?" },
-            class: "inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50" do %>
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-          </svg>
-          Удалить
+        <% if can_delete? %>
+          <%= link_to fids_equipment_path(@equipment),
+              data: { turbo_method: :delete, turbo_confirm: "Вы уверены?" },
+              class: "inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Удалить
+          <% end %>
+        <% else %>
+          <%= link_to "#",
+              onclick: "alert('Удаление недоступно для вашей роли'); return false;",
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-100 cursor-not-allowed" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Удалить
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -45,11 +56,7 @@
   <div class="bg-white shadow rounded-lg mb-6">
     <div class="px-4 py-5 sm:p-6">
       <h3 class="text-lg font-medium text-gray-900 mb-4">Основная информация</h3>
-      <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Название</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @equipment.name %></dd>
-        </div>
+      <dl class="grid grid-cols-1 sm:grid-cols-2" style="gap: 16px;">
         <div>
           <dt class="text-sm font-medium text-gray-500">Тип оборудования</dt>
           <dd class="mt-1 text-sm text-gray-900"><%= @equipment.equipment_type %></dd>
@@ -96,7 +103,7 @@
         </div>
         <div class="sm:col-span-2">
           <dt class="text-sm font-medium text-gray-500">Примечания</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @equipment.notes.presence || "—" %></dd>
+          <dd class="mt-1 text-sm text-gray-900"><%= @equipment.note.presence || "—" %></dd>
         </div>
       </dl>
     </div>
@@ -106,7 +113,7 @@
   <div class="bg-white shadow rounded-lg">
     <div class="px-4 py-5 sm:p-6">
       <h3 class="text-lg font-medium text-gray-900 mb-4">Системная информация</h3>
-      <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+      <dl class="grid grid-cols-1 sm:grid-cols-2" style="gap: 16px;">
         <div>
           <dt class="text-sm font-medium text-gray-500">Создано</dt>
           <dd class="mt-1 text-sm text-gray-900"><%= l @equipment.created_at, format: :long %></dd>

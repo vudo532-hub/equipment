@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe FidsInstallation, type: :model do
   describe 'associations' do
-    it { should belong_to(:user) }
+    it { should belong_to(:user).optional }
     it { should have_many(:fids_equipments).dependent(:nullify) }
   end
 
@@ -16,15 +16,19 @@ RSpec.describe FidsInstallation, type: :model do
     it { should validate_presence_of(:installation_type) }
     it { should validate_length_of(:installation_type).is_at_most(100) }
     it { should validate_length_of(:identifier).is_at_most(100) }
+
+    it 'validates uniqueness of identifier globally' do
+      create(:fids_installation, identifier: 'ID-001')
+      installation = build(:fids_installation, identifier: 'ID-001')
+      expect(installation).not_to be_valid
+    end
   end
 
   describe 'scopes' do
-    let(:user) { create(:user) }
-
     describe '.ordered' do
       it 'orders by name' do
-        z_install = create(:fids_installation, user: user, name: 'Zebra Display')
-        a_install = create(:fids_installation, user: user, name: 'Alpha Display')
+        z_install = create(:fids_installation, name: 'Zebra Display')
+        a_install = create(:fids_installation, name: 'Alpha Display')
         
         expect(FidsInstallation.ordered.first).to eq(a_install)
       end
@@ -40,9 +44,8 @@ RSpec.describe FidsInstallation, type: :model do
 
   describe '#equipment_count' do
     it 'returns count of associated equipments' do
-      user = create(:user)
-      installation = create(:fids_installation, user: user)
-      create_list(:fids_equipment, 3, user: user, fids_installation: installation)
+      installation = create(:fids_installation)
+      create_list(:fids_equipment, 3, fids_installation: installation)
       
       expect(installation.equipment_count).to eq(3)
     end

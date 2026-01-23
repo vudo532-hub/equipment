@@ -4,8 +4,10 @@ ru:
       user: Пользователь
       cute_installation: Место установки CUTE
       fids_installation: Место установки FIDS
+      zamar_installation: Место установки ZAMAR
       cute_equipment: Оборудование CUTE
       fids_equipment: Оборудование FIDS
+      zamar_equipment: Оборудование ZAMAR
     attributes:
       user:
         email: Email
@@ -20,10 +22,17 @@ ru:
         name: Название
         installation_type: Тип места
         identifier: Идентификатор
+        terminal: Терминал
       fids_installation:
         name: Название
         installation_type: Тип места
         identifier: Идентификатор
+        terminal: Терминал
+      zamar_installation:
+        name: Название
+        installation_type: Тип места
+        identifier: Идентификатор
+        terminal: Терминал
       cute_equipment:
         equipment_type: Тип оборудования
         equipment_model: Модель
@@ -34,6 +43,7 @@ ru:
         last_action_date: Дата последнего действия
         cute_installation: Место установки
         cute_installation_id: Место установки
+        last_changed_by: Последнее изменение
       fids_equipment:
         equipment_type: Тип оборудования
         equipment_model: Модель
@@ -44,6 +54,18 @@ ru:
         last_action_date: Дата последнего действия
         fids_installation: Место установки
         fids_installation_id: Место установки
+        last_changed_by: Последнее изменение
+      zamar_equipment:
+        equipment_type: Тип оборудования
+        equipment_model: Модель
+        inventory_number: Инвентарный номер
+        serial_number: Серийный номер
+        status: Статус
+        note: Примечание
+        last_action_date: Дата последнего действия
+        zamar_installation: Место установки
+        zamar_installation_id: Место установки
+        last_changed_by: Последнее изменение
     errors:
       models:
         user:
@@ -67,16 +89,49 @@ ru:
 
   # Статусы оборудования
   equipment_statuses:
-    active: Активно
-    inactive: Неактивно
-    maintenance: В ремонте
-    archived: В архиве
+    active: В работе
+    maintenance: В ремонт
+    waiting_repair: Ожидается из ремонта
+    ready_to_dispatch: Готово к выдачи
+    decommissioned: Списание
+    transferred: Передано в другое место
+    with_note: С примечанием
+
+  # Терминалы
+  terminals:
+    terminal_a: Терминал A
+    terminal_b: Терминал B
+    terminal_c: Терминал C
+    terminal_d: Терминал D
+    terminal_e: Терминал E
+    terminal_f: Терминал F
+
+  # Типы оборудования CUTE
+  cute_equipment_types:
+    boarding_pass_printer: Принтер посадочных талонов
+    baggage_tag_printer: Принтер багажных бирок
+    keyboard: Клавиатура
+    scanner: Сканер
+    gate_reader: Считыватель на гейте
+    flight_document_printer: Принтер полётной документации
+    monitor: Монитор
+    computer: Компьютер
+    other: Прочее
+
+  # Типы оборудования ZAMAR
+  zamar_equipment_types:
+    dsm: DSM
+    dba: DBA
+    sbdo: SBDO
+    gates: Gates
+    other: Прочее
 
   # Навигация
   navigation:
     dashboard: Главная
     cute: CUTE
     fids: FIDS
+    zamar: ZAMAR
     equipment: Оборудование
     installations: Места установки
     audit_logs: История изменений
