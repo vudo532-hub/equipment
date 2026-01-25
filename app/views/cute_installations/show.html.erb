@@ -166,12 +166,12 @@
   </div>
 </div>
 
-<!-- Modal для привязки оборудования -->
+<!-- Modal для привязки оборудования по серийному номеру -->
 <div id="assignEquipmentModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
   <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
     <div class="mt-3">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-medium text-gray-900">Привязать оборудование</h3>
+        <h3 class="text-lg font-medium text-gray-900">Привязать оборудование к "<%= @installation.name %>"</h3>
         <button type="button" onclick="closeAssignEquipmentModal()" class="text-gray-400 hover:text-gray-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -179,29 +179,78 @@
         </button>
       </div>
       
+      <!-- Поле ввода серийного номера -->
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Выберите оборудование</label>
-        <select id="unassignedEquipmentSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-          <option value="">Загрузка...</option>
-        </select>
+        <label for="serialNumberInput" class="block text-sm font-medium text-gray-700 mb-1">Серийный номер оборудования</label>
+        <div class="relative">
+          <input type="text" 
+                 id="serialNumberInput" 
+                 placeholder="Введите серийный номер..."
+                 autocomplete="off"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <div id="searchSpinner" class="hidden absolute right-3 top-2.5">
+            <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
       </div>
       
+      <!-- Preview найденного оборудования -->
+      <div id="equipmentPreview" class="hidden mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Найдено оборудование:</h4>
+        <dl class="space-y-1 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Тип:</dt>
+            <dd class="text-gray-900 font-medium" id="previewType"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Модель:</dt>
+            <dd class="text-gray-900" id="previewModel"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Серийный номер:</dt>
+            <dd class="text-gray-900" id="previewSerial"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Инв. номер:</dt>
+            <dd class="text-gray-900" id="previewInventory"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Статус:</dt>
+            <dd id="previewStatus"></dd>
+          </div>
+        </dl>
+        <input type="hidden" id="foundEquipmentId" value="">
+      </div>
+      
+      <!-- Сообщение об ошибке -->
+      <div id="searchError" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+        <div class="flex">
+          <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <p class="ml-3 text-sm text-red-700" id="searchErrorText"></p>
+        </div>
+      </div>
+      
+      <!-- Предупреждение о дублировании типа -->
       <div id="duplicateWarning" class="hidden mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
         <div class="flex">
           <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
           </svg>
-          <div class="ml-3">
-            <p class="text-sm text-yellow-700" id="duplicateWarningText"></p>
-          </div>
+          <p class="ml-3 text-sm text-yellow-700" id="duplicateWarningText"></p>
         </div>
       </div>
       
       <div class="flex justify-end space-x-3 gap-3">
-        <button type="button" onclick="closeAssignEquipmentModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+        <button type="button" onclick="closeAssignEquipmentModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
           Отмена
         </button>
-        <button type="button" onclick="assignEquipment()" id="assignButton"  style="cursor: pointer;" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+        <button type="button" onclick="attachEquipment()" id="attachButton" disabled 
+                class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer">
           Привязать
         </button>
       </div>
@@ -211,110 +260,118 @@
 
 <script>
   const installationId = <%= @installation.id %>;
-  let unassignedEquipments = [];
+  let searchTimeout = null;
   
   function openAssignEquipmentModal() {
     document.getElementById('assignEquipmentModal').classList.remove('hidden');
-    loadUnassignedEquipments();
+    document.getElementById('serialNumberInput').value = '';
+    document.getElementById('serialNumberInput').focus();
+    resetSearchState();
   }
   
   function closeAssignEquipmentModal() {
     document.getElementById('assignEquipmentModal').classList.add('hidden');
+    resetSearchState();
+  }
+  
+  function resetSearchState() {
+    document.getElementById('equipmentPreview').classList.add('hidden');
+    document.getElementById('searchError').classList.add('hidden');
     document.getElementById('duplicateWarning').classList.add('hidden');
+    document.getElementById('attachButton').disabled = true;
+    document.getElementById('foundEquipmentId').value = '';
   }
   
-  function loadUnassignedEquipments() {
-    const select = document.getElementById('unassignedEquipmentSelect');
-    select.innerHTML = '<option value="">Загрузка...</option>';
+  // Обработчик ввода серийного номера
+  document.getElementById('serialNumberInput').addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    resetSearchState();
     
-    fetch('/cute_equipments.json?unassigned=true')
-      .then(response => response.json())
-      .then(data => {
-        unassignedEquipments = data;
-        select.innerHTML = '<option value="">Выберите оборудование</option>';
-        data.forEach(eq => {
-          const option = document.createElement('option');
-          option.value = eq.id;
-          option.textContent = `${eq.equipment_type_text} - ${eq.inventory_number}`;
-          option.dataset.equipmentType = eq.equipment_type;
-          select.appendChild(option);
-        });
-        
-        // Add change handler for duplicate check
-        select.addEventListener('change', checkForDuplicate);
-      })
-      .catch(error => {
-        select.innerHTML = '<option value="">Ошибка загрузки</option>';
-        console.error('Error loading equipments:', error);
-      });
-  }
+    const serialNumber = e.target.value.trim();
+    if (serialNumber.length < 2) return;
+    
+    document.getElementById('searchSpinner').classList.remove('hidden');
+    
+    searchTimeout = setTimeout(() => {
+      searchEquipment(serialNumber);
+    }, 500);
+  });
   
-  function checkForDuplicate() {
-    const select = document.getElementById('unassignedEquipmentSelect');
-    const warning = document.getElementById('duplicateWarning');
-    const warningText = document.getElementById('duplicateWarningText');
-    
-    const selectedOption = select.options[select.selectedIndex];
-    if (!selectedOption || !selectedOption.value) {
-      warning.classList.add('hidden');
-      return;
-    }
-    
-    const equipmentType = selectedOption.dataset.equipmentType;
-    
-    fetch('/cute_equipments/check_duplicate', {
+  function searchEquipment(serialNumber) {
+    fetch(`/cute_installations/${installationId}/search_equipment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify({
-        equipment_type: equipmentType,
-        installation_id: installationId
-      })
+      body: JSON.stringify({ serial_number: serialNumber })
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.duplicate) {
-        warningText.textContent = `Внимание: оборудование типа "${data.equipment.equipment_type}" уже привязано к этому месту (инв. №${data.equipment.inventory_number})`;
-        warning.classList.remove('hidden');
+    .then(response => response.json().then(data => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+      document.getElementById('searchSpinner').classList.add('hidden');
+      
+      if (data.success) {
+        // Показываем preview оборудования
+        document.getElementById('previewType').textContent = data.equipment.equipment_type_human;
+        document.getElementById('previewModel').textContent = data.equipment.equipment_model || '—';
+        document.getElementById('previewSerial').textContent = data.equipment.serial_number;
+        document.getElementById('previewInventory').textContent = data.equipment.inventory_number;
+        document.getElementById('previewStatus').innerHTML = `<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${data.equipment.status_human}</span>`;
+        document.getElementById('foundEquipmentId').value = data.equipment.id;
+        
+        document.getElementById('equipmentPreview').classList.remove('hidden');
+        document.getElementById('searchError').classList.add('hidden');
+        document.getElementById('attachButton').disabled = false;
       } else {
-        warning.classList.add('hidden');
+        // Показываем ошибку
+        document.getElementById('searchErrorText').textContent = data.error;
+        document.getElementById('searchError').classList.remove('hidden');
+        document.getElementById('equipmentPreview').classList.add('hidden');
+        document.getElementById('attachButton').disabled = true;
       }
     })
     .catch(error => {
-      console.error('Error checking duplicate:', error);
+      document.getElementById('searchSpinner').classList.add('hidden');
+      document.getElementById('searchErrorText').textContent = 'Ошибка при поиске оборудования';
+      document.getElementById('searchError').classList.remove('hidden');
+      console.error('Error:', error);
     });
   }
   
-  function assignEquipment() {
-    const select = document.getElementById('unassignedEquipmentSelect');
-    const equipmentId = select.value;
+  function attachEquipment() {
+    const equipmentId = document.getElementById('foundEquipmentId').value;
     
     if (!equipmentId) {
-      alert('Выберите оборудование');
+      alert('Оборудование не выбрано');
       return;
     }
     
-    fetch(`/cute_equipments/${equipmentId}/assign_to_installation`, {
+    document.getElementById('attachButton').disabled = true;
+    document.getElementById('attachButton').textContent = 'Привязка...';
+    
+    fetch(`/cute_installations/${installationId}/attach_equipment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify({ installation_id: installationId })
+      body: JSON.stringify({ equipment_id: equipmentId })
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
         location.reload();
       } else {
-        alert(data.errors.join(', '));
+        alert(data.error || 'Ошибка при привязке');
+        document.getElementById('attachButton').disabled = false;
+        document.getElementById('attachButton').textContent = 'Привязать';
       }
     })
     .catch(error => {
       console.error('Error:', error);
       alert('Ошибка при привязке оборудования');
+      document.getElementById('attachButton').disabled = false;
+      document.getElementById('attachButton').textContent = 'Привязать';
     });
   }
   
@@ -323,8 +380,8 @@
       return;
     }
     
-    fetch(`/cute_equipments/${equipmentId}/unassign_from_installation`, {
-      method: 'POST',
+    fetch(`/cute_installations/${installationId}/detach_equipment?equipment_id=${equipmentId}`, {
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
@@ -335,7 +392,7 @@
       if (data.success) {
         location.reload();
       } else {
-        alert(data.errors.join(', '));
+        alert(data.error || 'Ошибка при отвязке');
       }
     })
     .catch(error => {
@@ -343,4 +400,18 @@
       alert('Ошибка при отвязке оборудования');
     });
   }
+  
+  // Закрытие по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeAssignEquipmentModal();
+    }
+  });
+  
+  // Закрытие по клику вне модального окна
+  document.getElementById('assignEquipmentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAssignEquipmentModal();
+    }
+  });
 </script>

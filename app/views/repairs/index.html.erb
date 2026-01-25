@@ -1,0 +1,278 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Ремонт</h1>
+        <p class="mt-1 text-sm text-gray-600">Оборудование в статусе "В ремонт"</p>
+      </div>
+      <div class="flex gap-2">
+        <%= link_to history_repairs_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          История ремонта
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white shadow rounded-lg mb-6">
+    <div class="px-4 py-5 sm:p-6">
+      <%= form_with url: repairs_path, method: :get, local: true, class: "flex flex-wrap gap-4 items-end" do %>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Система</label>
+          <%= select_tag :system, 
+              options_for_select([
+                ["Все системы", ""],
+                ["CUTE", "cute"],
+                ["FIDS", "fids"],
+                ["Zamar", "zamar"]
+              ], params[:system]),
+              class: "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500" %>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Терминал</label>
+          <%= select_tag :terminal, 
+              options_for_select([
+                ["Все терминалы", ""],
+                ["Терминал A", "terminal_a"],
+                ["Терминал B", "terminal_b"],
+                ["Терминал C", "terminal_c"],
+                ["Терминал D", "terminal_d"],
+                ["Терминал E", "terminal_e"],
+                ["Терминал F", "terminal_f"]
+              ], params[:terminal]),
+              class: "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500" %>
+        </div>
+
+        <div class="flex gap-2">
+          <%= submit_tag "Применить", class: "px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 cursor-pointer" %>
+          <%= link_to "Сбросить", repairs_path, class: "px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Equipment Table -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">
+          Оборудование (<span id="selectedCount">0</span> / <%= @all_equipments.size %> выбрано)
+        </h3>
+        <button type="button" 
+                onclick="createRepairBatch()"
+                id="createBatchBtn"
+                disabled
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Оформить акт передачи в ремонт
+        </button>
+      </div>
+
+      <% if @all_equipments.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-3 text-left">
+                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer">
+                </th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Система</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Терминал</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Место установки</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Тип</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Модель</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Инв. №</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">С/Н</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Примечание</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Пользователь</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @all_equipments.each do |eq| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-3">
+                    <input type="checkbox" 
+                           class="equipment-checkbox rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                           data-id="<%= eq[:id] %>"
+                           data-type="<%= eq[:type] %>"
+                           onchange="updateSelectedCount()">
+                  </td>
+                  <td class="px-3 py-3 text-sm">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                      <%= case eq[:system]
+                          when 'CUTE' then 'bg-blue-100 text-blue-800'
+                          when 'FIDS' then 'bg-green-100 text-green-800'
+                          when 'Zamar' then 'bg-purple-100 text-purple-800'
+                          end %>">
+                      <%= eq[:system] %>
+                    </span>
+                  </td>
+                  <td class="px-3 py-3 text-sm text-gray-900"><%= eq[:terminal] || "—" %></td>
+                  <td class="px-3 py-3 text-sm text-gray-900"><%= eq[:installation] || "—" %></td>
+                  <td class="px-3 py-3 text-sm text-gray-900"><%= eq[:equipment_type] %></td>
+                  <td class="px-3 py-3 text-sm text-gray-500"><%= eq[:model] || "—" %></td>
+                  <td class="px-3 py-3 text-sm text-gray-500"><%= eq[:inventory_number] %></td>
+                  <td class="px-3 py-3 text-sm text-gray-500"><%= eq[:serial_number] || "—" %></td>
+                  <td class="px-3 py-3 text-sm text-gray-500" title="<%= eq[:note] %>">
+                    <%= truncate(eq[:note], length: 30) || "—" %>
+                  </td>
+                  <td class="px-3 py-3 text-sm text-gray-500">
+                    <%= eq[:last_action_date]&.strftime("%d.%m.%Y") || "—" %>
+                  </td>
+                  <td class="px-3 py-3 text-sm text-gray-500"><%= eq[:last_changed_by] || "—" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">Нет оборудования в статусе "В ремонт"</h3>
+          <p class="mt-1 text-sm text-gray-500">Всё оборудование работает исправно.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Modal подтверждения -->
+<div id="confirmModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-center w-12 h-12 mx-auto bg-orange-100 rounded-full">
+        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h3 class="mt-4 text-lg font-medium text-gray-900 text-center">Оформить акт передачи в ремонт?</h3>
+      <p class="mt-2 text-sm text-gray-500 text-center">
+        Вы выбрали <strong id="confirmCount">0</strong> единиц оборудования.
+      </p>
+      <div id="confirmList" class="mt-3 max-h-40 overflow-y-auto text-sm text-gray-600 border rounded p-2">
+      </div>
+      <div class="flex justify-end gap-3 mt-4">
+        <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+          Отмена
+        </button>
+        <button type="button" onclick="submitBatch()" id="confirmBtn" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 cursor-pointer">
+          Подтвердить
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedEquipments = [];
+
+  function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.equipment-checkbox');
+    checkboxes.forEach(cb => {
+      cb.checked = selectAll.checked;
+    });
+    updateSelectedCount();
+  }
+
+  function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.equipment-checkbox:checked');
+    selectedEquipments = Array.from(checkboxes).map(cb => ({
+      id: cb.dataset.id,
+      type: cb.dataset.type
+    }));
+    
+    document.getElementById('selectedCount').textContent = selectedEquipments.length;
+    document.getElementById('createBatchBtn').disabled = selectedEquipments.length === 0;
+    
+    // Update select all checkbox state
+    const allCheckboxes = document.querySelectorAll('.equipment-checkbox');
+    document.getElementById('selectAll').checked = checkboxes.length === allCheckboxes.length && allCheckboxes.length > 0;
+  }
+
+  function createRepairBatch() {
+    if (selectedEquipments.length === 0) {
+      alert('Выберите оборудование');
+      return;
+    }
+    
+    // Show confirmation modal
+    document.getElementById('confirmCount').textContent = selectedEquipments.length;
+    
+    // Build list of selected equipment
+    const listEl = document.getElementById('confirmList');
+    const checkboxes = document.querySelectorAll('.equipment-checkbox:checked');
+    let listHtml = '<ul class="list-disc pl-4">';
+    const maxShow = 5;
+    let count = 0;
+    checkboxes.forEach(cb => {
+      if (count < maxShow) {
+        const row = cb.closest('tr');
+        const type = row.querySelector('td:nth-child(5)').textContent.trim();
+        const model = row.querySelector('td:nth-child(6)').textContent.trim();
+        const sn = row.querySelector('td:nth-child(8)').textContent.trim();
+        listHtml += `<li>${type} - ${model} (${sn})</li>`;
+      }
+      count++;
+    });
+    if (count > maxShow) {
+      listHtml += `<li class="text-gray-400">...и ещё ${count - maxShow}</li>`;
+    }
+    listHtml += '</ul>';
+    listEl.innerHTML = listHtml;
+    
+    document.getElementById('confirmModal').classList.remove('hidden');
+  }
+
+  function closeConfirmModal() {
+    document.getElementById('confirmModal').classList.add('hidden');
+  }
+
+  function submitBatch() {
+    document.getElementById('confirmBtn').disabled = true;
+    document.getElementById('confirmBtn').textContent = 'Создание...';
+    
+    fetch('/repairs/create_batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ equipment_ids: selectedEquipments })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        window.location.href = `/repairs/${data.batch_id}`;
+      } else {
+        alert(data.error || 'Ошибка при создании акта');
+        document.getElementById('confirmBtn').disabled = false;
+        document.getElementById('confirmBtn').textContent = 'Подтвердить';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Ошибка при создании акта');
+      document.getElementById('confirmBtn').disabled = false;
+      document.getElementById('confirmBtn').textContent = 'Подтвердить';
+    });
+  }
+
+  // Close modal on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeConfirmModal();
+    }
+  });
+</script>

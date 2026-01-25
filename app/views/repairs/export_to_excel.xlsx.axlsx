@@ -1,0 +1,41 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Акт #{@batch.repair_number}") do |sheet|
+  # Заголовок
+  sheet.add_row ["Акт передачи оборудования в ремонт"], style: wb.styles.add_style(b: true, sz: 16)
+  sheet.add_row []
+  
+  # Информация об акте
+  sheet.add_row ["Номер акта:", @batch.repair_number]
+  sheet.add_row ["Дата создания:", @batch.created_at.strftime("%d.%m.%Y %H:%M")]
+  sheet.add_row ["Создал:", @batch.user&.full_name || "—"]
+  sheet.add_row ["Статус:", @batch.status_text]
+  sheet.add_row ["Количество оборудования:", @batch.equipment_count]
+  sheet.add_row []
+  
+  # Заголовки таблицы
+  header_style = wb.styles.add_style(b: true, bg_color: "DDDDDD", border: Axlsx::STYLE_THIN_BORDER)
+  cell_style = wb.styles.add_style(border: Axlsx::STYLE_THIN_BORDER)
+  
+  sheet.add_row ["№", "Система", "Терминал", "Место установки", "Модель", "Инв. номер", "Серийный номер", "Примечание"], style: header_style
+  
+  # Данные
+  @batch.repair_batch_items.each_with_index do |item, index|
+    sheet.add_row [
+      index + 1,
+      item.system,
+      item.terminal || "—",
+      item.installation_name || "—",
+      item.model || "—",
+      item.inventory_number,
+      item.serial_number || "—",
+      item.note || "—"
+    ], style: cell_style
+  end
+  
+  sheet.add_row []
+  sheet.add_row ["Итого:", @batch.equipment_count, "единиц оборудования"]
+  
+  # Ширина колонок
+  sheet.column_widths 5, 10, 15, 25, 20, 15, 20, 30
+end

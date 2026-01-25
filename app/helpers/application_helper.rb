@@ -186,4 +186,142 @@ module ApplicationHelper
       '<svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'.html_safe
     end
   end
+
+  # Описание объекта в audit log
+  def audit_object_description(audit)
+    auditable = audit.auditable
+    return audit.auditable_type if auditable.nil?
+
+    case audit.auditable_type
+    when "CuteEquipment"
+      equipment_description(auditable, "CUTE")
+    when "FidsEquipment"
+      equipment_description(auditable, "FIDS")
+    when "ZamarEquipment"
+      equipment_description(auditable, "Zamar")
+    when "CuteInstallation"
+      installation_description(auditable, "CUTE")
+    when "FidsInstallation"
+      installation_description(auditable, "FIDS")
+    when "ZamarInstallation"
+      installation_description(auditable, "Zamar")
+    else
+      auditable.try(:name) || audit.auditable_type
+    end
+  end
+
+  def equipment_description(equipment, system)
+    type_name = case system
+                when "CUTE"
+                  equipment.respond_to?(:equipment_type_text) ? equipment.equipment_type_text : equipment.equipment_type
+                when "Zamar"
+                  zamar_equipment_type_name(equipment.equipment_type)
+                else
+                  equipment.equipment_type
+                end
+    model = equipment.equipment_model.presence || "—"
+    serial = equipment.serial_number.presence || "—"
+    "[#{system}] #{type_name} / #{model} (S/N: #{serial})"
+  end
+
+  def installation_description(installation, system)
+    terminal_info = if installation.terminal.present?
+                      "Терминал #{installation.terminal_name}"
+                    else
+                      "Без терминала"
+                    end
+    "[#{system}] #{installation.name} (#{terminal_info})"
+  end
+
+  # Форматированный вывод изменений в audit log
+  def formatted_audit_changes(audit)
+    changes = audit.audited_changes
+    return "" if changes.blank?
+
+    result = []
+    changes.each do |field, values|
+      old_value, new_value = values.is_a?(Array) ? values : [nil, values]
+      
+      field_label = human_field_name(field)
+      old_display = format_change_value(field, old_value, audit.auditable_type)
+      new_display = format_change_value(field, new_value, audit.auditable_type)
+
+      if audit.action == "create"
+        result << "#{field_label}: #{new_display}" if new_value.present?
+      elsif audit.action == "destroy"
+        result << "#{field_label}: #{old_display}" if old_value.present?
+      else
+        result << content_tag(:span, class: "inline-block") do
+          safe_join([
+            content_tag(:span, "#{field_label}: ", class: "font-medium"),
+            content_tag(:span, old_display, class: "text-gray-500 line-through"),
+            content_tag(:span, " → ", class: "mx-1 text-gray-400"),
+            content_tag(:span, new_display, class: "text-green-700 font-medium")
+          ])
+        end
+      end
+    end
+    
+    safe_join(result, content_tag(:br))
+  end
+
+  def human_field_name(field)
+    {
+      "status" => "Статус",
+      "equipment_type" => "Тип",
+      "equipment_model" => "Модель",
+      "serial_number" => "С/Н",
+      "inventory_number" => "Инв. №",
+      "note" => "Примечание",
+      "name" => "Название",
+      "installation_type" => "Тип места",
+      "identifier" => "Идентификатор",
+      "terminal" => "Терминал",
+      "cute_installation_id" => "Место установки",
+      "fids_installation_id" => "Место установки",
+      "zamar_installation_id" => "Место установки",
+      "last_changed_by_id" => "Изменил",
+      "last_action_date" => "Дата действия"
+    }[field] || field.humanize
+  end
+
+  def format_change_value(field, value, auditable_type)
+    return "(пусто)" if value.blank?
+
+    case field
+    when "status"
+      I18n.t("equipment_statuses.#{value}", default: value.to_s.humanize)
+    when "equipment_type"
+      case auditable_type
+      when "CuteEquipment"
+        I18n.t("cute_equipment_types.#{value}", default: value.to_s.humanize)
+      when "ZamarEquipment"
+        I18n.t("zamar_equipment_types.#{value}", default: value.to_s.upcase)
+      else
+        value.to_s
+      end
+    when "terminal"
+      "Терминал #{value.to_s.split('_').last.upcase}"
+    when "cute_installation_id"
+      installation = CuteInstallation.find_by(id: value)
+      installation ? installation.name : "(Место ##{value})"
+    when "fids_installation_id"
+      installation = FidsInstallation.find_by(id: value)
+      installation ? installation.name : "(Место ##{value})"
+    when "zamar_installation_id"
+      installation = ZamarInstallation.find_by(id: value)
+      installation ? installation.name : "(Место ##{value})"
+    when "last_changed_by_id"
+      user = User.find_by(id: value)
+      user ? user.full_name : "(Пользователь ##{value})"
+    when "last_action_date"
+      if value.is_a?(String)
+        Time.parse(value).strftime("%d.%m.%Y %H:%M") rescue value
+      else
+        value.strftime("%d.%m.%Y %H:%M")
+      end
+    else
+      value.to_s.truncate(100)
+    end
+  end
 end

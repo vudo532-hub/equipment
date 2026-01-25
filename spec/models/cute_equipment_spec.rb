@@ -14,6 +14,14 @@ RSpec.describe CuteEquipment, type: :model do
 
     it { should validate_presence_of(:equipment_type) }
     it { should validate_presence_of(:inventory_number) }
+    it { should validate_presence_of(:serial_number) }
+
+    it 'validates uniqueness of serial_number globally' do
+      create(:cute_equipment, serial_number: 'SN-UNIQUE-001')
+      duplicate = build(:cute_equipment, serial_number: 'SN-UNIQUE-001')
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:serial_number]).to include('уже существует')
+    end
 
     it 'validates uniqueness of inventory_number globally' do
       create(:cute_equipment, inventory_number: 'INV-001')

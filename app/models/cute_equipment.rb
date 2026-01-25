@@ -39,7 +39,9 @@ class CuteEquipment < ApplicationRecord
   validates :inventory_number, presence: true,
                                length: { maximum: 100 },
                                uniqueness: { message: "уже существует" }
-  validates :serial_number, length: { maximum: 100 }
+  validates :serial_number, presence: true,
+                            length: { maximum: 100 },
+                            uniqueness: { message: "уже существует" }
   validates :note, length: { maximum: 2000 }
   validate :unique_equipment_type_per_installation, unless: :current_user_admin
 
@@ -69,6 +71,9 @@ class CuteEquipment < ApplicationRecord
     I18n.t("cute_equipment_types.#{equipment_type}", default: equipment_type.to_s.humanize)
   end
 
+  # Алиас для API
+  alias_method :human_equipment_type, :equipment_type_text
+
   def status_color
     case status
     when "active" then "bg-green-100 text-green-800"
@@ -86,6 +91,9 @@ class CuteEquipment < ApplicationRecord
     return "—" if status.blank?
     I18n.t("equipment_statuses.#{status}", default: status.to_s.humanize)
   end
+
+  # Алиас для API
+  alias_method :human_status, :status_text
 
   # Ransack configuration
   def self.ransackable_attributes(auth_object = nil)

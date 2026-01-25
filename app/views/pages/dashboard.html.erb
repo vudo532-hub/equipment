@@ -114,10 +114,44 @@
   </div>
 
   <!-- =========================================
-       3. СКЛАД (Оборудование без привязки)
+       3. БЛОК РЕМОНТ
+       ========================================= -->
+  <div class="bg-red-50 rounded-xl border border-red-200 p-6 mb-8">
+    <%= link_to repairs_path, class: "block hover:opacity-90 transition-opacity" do %>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="p-3 bg-red-100 rounded-full mr-4">
+            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Ремонт</h3>
+            <p class="text-sm text-gray-600">Оборудование, требующее ремонта</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="flex items-center gap-6">
+            <div>
+              <p class="text-3xl font-bold text-red-600"><%= @repair_maintenance_count %></p>
+              <p class="text-sm text-gray-500">В ремонт</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-orange-600"><%= @repair_waiting_count %></p>
+              <p class="text-sm text-gray-500">Ожидается из ремонта</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- =========================================
+       4. СКЛАД (Оборудование без привязки)
        ========================================= -->
   <div class="bg-orange-50 rounded-xl border border-orange-200 p-6 mb-8">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mb-4">
       <div class="flex items-center">
         <div class="p-3 bg-orange-100 rounded-full mr-4">
           <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,10 +170,57 @@
         </p>
       </div>
     </div>
+    
+    <!-- Детальная разбивка по моделям -->
+    <% if @total_warehouse > 0 %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-orange-200">
+        <% if @cute_warehouse_by_model.any? %>
+          <div>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">CUTE</h4>
+            <ul class="text-sm space-y-1">
+              <% @cute_warehouse_by_model.first(5).each do |model, count| %>
+                <li class="flex justify-between">
+                  <span class="text-gray-600 truncate"><%= model || "Без модели" %></span>
+                  <span class="font-medium text-gray-900"><%= count %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        
+        <% if @fids_warehouse_by_model.any? %>
+          <div>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">FIDS</h4>
+            <ul class="text-sm space-y-1">
+              <% @fids_warehouse_by_model.first(5).each do |model, count| %>
+                <li class="flex justify-between">
+                  <span class="text-gray-600 truncate"><%= model || "Без модели" %></span>
+                  <span class="font-medium text-gray-900"><%= count %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        
+        <% if @zamar_warehouse_by_model.any? %>
+          <div>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">ZAMAR</h4>
+            <ul class="text-sm space-y-1">
+              <% @zamar_warehouse_by_model.first(5).each do |model, count| %>
+                <li class="flex justify-between">
+                  <span class="text-gray-600 truncate"><%= model || "Без модели" %></span>
+                  <span class="font-medium text-gray-900"><%= count %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
   <!-- =========================================
-       4. ОБОРУДОВАНИЕ ПО ТЕРМИНАЛАМ
+       5. ОБОРУДОВАНИЕ ПО ТЕРМИНАЛАМ
        ========================================= -->
   <div class="bg-white rounded-xl shadow-md mb-8">
     <div class="px-6 py-4 border-b border-gray-200">

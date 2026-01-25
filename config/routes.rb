@@ -16,7 +16,13 @@ Rails.application.routes.draw do
     resource :profile, only: [:show, :edit, :update], controller: 'profiles'
 
     # CUTE
-    resources :cute_installations
+    resources :cute_installations do
+      member do
+        post :search_equipment
+        post :attach_equipment
+        delete :detach_equipment
+      end
+    end
     resources :cute_equipments do
       collection do
         post :check_duplicate
@@ -29,7 +35,13 @@ Rails.application.routes.draw do
     end
 
     # FIDS
-    resources :fids_installations
+    resources :fids_installations do
+      member do
+        post :search_equipment
+        post :attach_equipment
+        delete :detach_equipment
+      end
+    end
     resources :fids_equipments do
       member do
         get :audit_history
@@ -37,7 +49,13 @@ Rails.application.routes.draw do
     end
 
     # ZAMAR
-    resources :zamar_installations
+    resources :zamar_installations do
+      member do
+        post :search_equipment
+        post :attach_equipment
+        delete :detach_equipment
+      end
+    end
     resources :zamar_equipments do
       member do
         get :audit_history
@@ -46,6 +64,17 @@ Rails.application.routes.draw do
 
     # Audit logs
     resources :audit_logs, only: [:index, :show]
+
+    # Ремонт
+    resources :repairs, only: [:index, :show] do
+      collection do
+        post :create_batch
+        get :history
+      end
+      member do
+        get :export_to_excel
+      end
+    end
 
     # Export to Excel
     get "export/cute_equipments", to: "exports#cute_equipments", as: :export_cute_equipments

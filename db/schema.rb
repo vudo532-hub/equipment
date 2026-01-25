@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_23_111338) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_25_114335) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,6 +62,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_23_111338) do
     t.datetime "updated_at", null: false
     t.bigint "last_changed_by_id"
     t.index ["cute_installation_id"], name: "index_cute_equipments_on_cute_installation_id"
+    t.index ["equipment_model"], name: "index_cute_equipments_on_equipment_model"
+    t.index ["equipment_type", "cute_installation_id"], name: "idx_on_equipment_type_cute_installation_id_620304c018"
     t.index ["equipment_type"], name: "index_cute_equipments_on_equipment_type"
     t.index ["inventory_number"], name: "index_cute_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_cute_equipments_on_last_action_date"
@@ -100,6 +102,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_23_111338) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "last_changed_by_id"
+    t.index ["equipment_model"], name: "index_fids_equipments_on_equipment_model"
+    t.index ["equipment_type", "fids_installation_id"], name: "idx_on_equipment_type_fids_installation_id_9345370e8c"
     t.index ["equipment_type"], name: "index_fids_equipments_on_equipment_type"
     t.index ["fids_installation_id"], name: "index_fids_equipments_on_fids_installation_id"
     t.index ["inventory_number"], name: "index_fids_equipments_on_inventory_number"
@@ -124,6 +128,38 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_23_111338) do
     t.index ["terminal"], name: "index_fids_installations_on_terminal"
     t.index ["user_id", "identifier"], name: "index_fids_installations_on_user_id_and_identifier", unique: true, where: "(identifier IS NOT NULL)"
     t.index ["user_id"], name: "index_fids_installations_on_user_id"
+  end
+
+  create_table "repair_batch_items", force: :cascade do |t|
+    t.bigint "repair_batch_id", null: false
+    t.string "equipment_type", null: false
+    t.bigint "equipment_id", null: false
+    t.string "system", null: false
+    t.string "serial_number"
+    t.string "model"
+    t.string "inventory_number"
+    t.string "terminal"
+    t.string "installation_name"
+    t.text "note"
+    t.datetime "created_at"
+    t.index ["equipment_type", "equipment_id"], name: "index_repair_batch_items_on_equipment_type_and_equipment_id"
+    t.index ["repair_batch_id"], name: "index_repair_batch_items_on_repair_batch_id"
+    t.index ["serial_number"], name: "index_repair_batch_items_on_serial_number"
+    t.index ["system"], name: "index_repair_batch_items_on_system"
+  end
+
+  create_table "repair_batches", force: :cascade do |t|
+    t.string "repair_number", null: false
+    t.bigint "user_id"
+    t.integer "equipment_count", default: 0
+    t.string "status", default: "sent"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_repair_batches_on_created_at"
+    t.index ["repair_number"], name: "index_repair_batches_on_repair_number", unique: true
+    t.index ["status"], name: "index_repair_batches_on_status"
+    t.index ["user_id"], name: "index_repair_batches_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -155,6 +191,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_23_111338) do
     t.datetime "last_action_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["equipment_model"], name: "index_zamar_equipments_on_equipment_model"
+    t.index ["equipment_type", "zamar_installation_id"], name: "idx_on_equipment_type_zamar_installation_id_ecc9e009e3"
     t.index ["equipment_type"], name: "index_zamar_equipments_on_equipment_type"
     t.index ["inventory_number"], name: "index_zamar_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_zamar_equipments_on_last_action_date"
@@ -190,6 +228,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_23_111338) do
   add_foreign_key "fids_equipments", "users"
   add_foreign_key "fids_equipments", "users", column: "last_changed_by_id"
   add_foreign_key "fids_installations", "users"
+  add_foreign_key "repair_batch_items", "repair_batches"
+  add_foreign_key "repair_batches", "users"
   add_foreign_key "zamar_equipments", "users"
   add_foreign_key "zamar_equipments", "users", column: "last_changed_by_id"
   add_foreign_key "zamar_equipments", "zamar_installations"

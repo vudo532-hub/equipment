@@ -24,7 +24,9 @@ class FidsEquipment < ApplicationRecord
   validates :inventory_number, presence: true,
                                length: { maximum: 100 },
                                uniqueness: { message: "уже существует" }
-  validates :serial_number, length: { maximum: 100 }
+  validates :serial_number, presence: true,
+                            length: { maximum: 100 },
+                            uniqueness: { message: "уже существует" }
   validates :note, length: { maximum: 2000 }
 
   # Scopes

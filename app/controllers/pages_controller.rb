@@ -104,6 +104,42 @@ class PagesController < ApplicationController
       .sort_by { |e| e[:equipment].created_at }
       .reverse
       .first(5)
+
+    # =========================================
+    # 8. Статистика по ремонту
+    # =========================================
+    @repair_maintenance_count = CuteEquipment.where(status: :maintenance).count +
+                                FidsEquipment.where(status: :maintenance).count +
+                                ZamarEquipment.where(status: :maintenance).count
+    
+    @repair_waiting_count = CuteEquipment.where(status: :waiting_repair).count +
+                            FidsEquipment.where(status: :waiting_repair).count +
+                            ZamarEquipment.where(status: :waiting_repair).count
+
+    # =========================================
+    # 9. Оборудование по моделям
+    # =========================================
+    @cute_by_model = CuteEquipment.group(:equipment_model).count.sort_by { |_, v| -v }.first(10).to_h
+    @fids_by_model = FidsEquipment.group(:equipment_model).count.sort_by { |_, v| -v }.first(10).to_h
+    @zamar_by_model = ZamarEquipment.group(:equipment_model).count.sort_by { |_, v| -v }.first(10).to_h
+
+    # =========================================
+    # 10. На складе по моделям и терминалам
+    # =========================================
+    @cute_warehouse_by_model = CuteEquipment.where(cute_installation_id: nil)
+                                            .group(:equipment_model)
+                                            .count
+                                            .sort_by { |_, v| -v }
+    
+    @fids_warehouse_by_model = FidsEquipment.where(fids_installation_id: nil)
+                                            .group(:equipment_model)
+                                            .count
+                                            .sort_by { |_, v| -v }
+    
+    @zamar_warehouse_by_model = ZamarEquipment.where(zamar_installation_id: nil)
+                                              .group(:equipment_model)
+                                              .count
+                                              .sort_by { |_, v| -v }
   end
 
   private
