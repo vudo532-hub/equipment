@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_25_114335) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_114335) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "last_changed_by_id"
+    t.string "repair_ticket_number"
     t.index ["cute_installation_id"], name: "index_cute_equipments_on_cute_installation_id"
     t.index ["equipment_model"], name: "index_cute_equipments_on_equipment_model"
     t.index ["equipment_type", "cute_installation_id"], name: "idx_on_equipment_type_cute_installation_id_620304c018"
@@ -102,6 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_114335) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "last_changed_by_id"
+    t.string "repair_ticket_number"
     t.index ["equipment_model"], name: "index_fids_equipments_on_equipment_model"
     t.index ["equipment_type", "fids_installation_id"], name: "idx_on_equipment_type_fids_installation_id_9345370e8c"
     t.index ["equipment_type"], name: "index_fids_equipments_on_equipment_type"
@@ -142,6 +144,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_114335) do
     t.string "installation_name"
     t.text "note"
     t.datetime "created_at"
+    t.string "repair_ticket_number"
+    t.string "equipment_type_name"
     t.index ["equipment_type", "equipment_id"], name: "index_repair_batch_items_on_equipment_type_and_equipment_id"
     t.index ["repair_batch_id"], name: "index_repair_batch_items_on_repair_batch_id"
     t.index ["serial_number"], name: "index_repair_batch_items_on_serial_number"
@@ -191,6 +195,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_25_114335) do
     t.datetime "last_action_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "repair_ticket_number"
     t.index ["equipment_model"], name: "index_zamar_equipments_on_equipment_model"
     t.index ["equipment_type", "zamar_installation_id"], name: "idx_on_equipment_type_zamar_installation_id_ecc9e009e3"
     t.index ["equipment_type"], name: "index_zamar_equipments_on_equipment_type"

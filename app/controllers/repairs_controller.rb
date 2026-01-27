@@ -3,9 +3,9 @@ class RepairsController < ApplicationController
 
   def index
     # Собираем оборудование в статусе "В ремонт" из всех систем
-    @cute_equipments = CuteEquipment.where(status: :maintenance).includes(:cute_installation, :last_changed_by)
-    @fids_equipments = FidsEquipment.where(status: :maintenance).includes(:fids_installation, :last_changed_by)
-    @zamar_equipments = ZamarEquipment.where(status: :maintenance).includes(:zamar_installation, :last_changed_by)
+    @cute_equipments = CuteEquipment.where(status: :maintenance).includes(:cute_installation)
+    @fids_equipments = FidsEquipment.where(status: :maintenance).includes(:fids_installation)
+    @zamar_equipments = ZamarEquipment.where(status: :maintenance).includes(:zamar_installation)
 
     # Фильтрация по терминалу
     if params[:terminal].present?
@@ -50,8 +50,7 @@ class RepairsController < ApplicationController
         serial_number: eq.serial_number,
         status: eq.status_text,
         note: eq.note,
-        last_action_date: eq.last_action_date,
-        last_changed_by: eq.last_changed_by&.full_name
+        repair_ticket_number: eq.repair_ticket_number
       }
     end
 
@@ -68,8 +67,7 @@ class RepairsController < ApplicationController
         serial_number: eq.serial_number,
         status: eq.status_text,
         note: eq.note,
-        last_action_date: eq.last_action_date,
-        last_changed_by: eq.last_changed_by&.full_name
+        repair_ticket_number: eq.repair_ticket_number
       }
     end
 
@@ -86,13 +84,12 @@ class RepairsController < ApplicationController
         serial_number: eq.serial_number,
         status: eq.status_text,
         note: eq.note,
-        last_action_date: eq.last_action_date,
-        last_changed_by: eq.last_changed_by&.full_name
+        repair_ticket_number: eq.repair_ticket_number
       }
     end
 
-    # Сортировка по дате последнего действия
-    @all_equipments.sort_by! { |eq| eq[:last_action_date] || Time.at(0) }.reverse!
+    # Сортировка по инвентарному номеру
+    @all_equipments.sort_by! { |eq| eq[:inventory_number] || "" }
 
     # Список терминалов для фильтра
     @terminals = CuteInstallation.terminal_a.model.attribute_types["terminal"].serialize.to_a rescue %w[terminal_a terminal_b terminal_c terminal_d terminal_e terminal_f]
@@ -128,31 +125,88 @@ class RepairsController < ApplicationController
                        when "ZamarEquipment" then equipment.zamar_installation
                        end
 
+        # Отвязываем оборудование от места установки, если оно привязано
+        if installation.present?
+          case equipment_type
+          when "CuteEquipment"
+            equipment.update!(cute_installation_id: nil)
+          when "FidsEquipment"
+            equipment.update!(fids_installation_id: nil)
+          when "ZamarEquipment"
+            equipment.update!(zamar_installation_id: nil)
+          end
+          
+          # Логируем отвязку
+          equipment.audits.create!(
+            user: current_user,
+            action: "update",
+            audited_changes: {
+              "#{equipment_type.downcase}_installation_id" => [installation.id, nil]
+            },
+            comment: "Отвязано от места установки перед отправкой в ремонт"
+          )
+        end
+
         # Создаем запись в акте
+        equipment_type_name = case equipment_type
+                              when "CuteEquipment" then equipment.equipment_type_text
+                              when "FidsEquipment" then equipment.equipment_type
+                              when "ZamarEquipment" then equipment.equipment_type_text
+                              end
+        
         @batch.repair_batch_items.create!(
           equipment_type: equipment_type,
           equipment_id: equipment_id,
+          equipment_type_name: equipment_type_name,
           system: equipment_type.gsub("Equipment", "").upcase.gsub("CUTE", "CUTE").gsub("FIDS", "FIDS").gsub("ZAMAR", "Zamar"),
           serial_number: equipment.serial_number,
           model: equipment.equipment_model,
           inventory_number: equipment.inventory_number,
           terminal: installation&.terminal_name,
           installation_name: installation&.name,
-          note: equipment.note
+          note: equipment.note,
+          repair_ticket_number: equipment.repair_ticket_number
         )
 
         # Меняем статус на "Ожидается из ремонта"
+        old_status = equipment.status
         equipment.update!(
           status: :waiting_repair,
           last_changed_by: current_user,
           last_action_date: Time.current
+        )
+        
+        # Очищаем номер заявки после создания акта
+        old_ticket_number = equipment.repair_ticket_number
+        equipment.update!(repair_ticket_number: nil)
+        
+        # Логируем очистку номера заявки
+        if old_ticket_number.present?
+          equipment.audits.create!(
+            user: current_user,
+            action: "update",
+            audited_changes: {
+              "repair_ticket_number" => [old_ticket_number, nil]
+            },
+            comment: "Номер заявки очищен при создании акта ремонта №#{@batch.repair_number}"
+          )
+        end
+        
+        # Логируем изменение статуса
+        equipment.audits.create!(
+          user: current_user,
+          action: "update",
+          audited_changes: {
+            "status" => [old_status, "waiting_repair"]
+          },
+          comment: "Статус изменён на 'Ожидается из ремонта' при отправке в ремонт"
         )
       end
     end
 
     render json: { 
       success: true, 
-      message: "Акт №#{@batch.repair_number} создан! #{@batch.equipment_count} единиц оборудования отправлено в ремонт.",
+      message: "Акт №#{@batch.repair_number} создан! #{@batch.equipment_count} ед. оборудования отправлено в ремонт.",
       batch_id: @batch.id,
       repair_number: @batch.repair_number
     }
@@ -172,7 +226,75 @@ class RepairsController < ApplicationController
     
     respond_to do |format|
       format.xlsx {
-        response.headers['Content-Disposition'] = "attachment; filename=\"Акт_ремонта_#{@batch.repair_number}.xlsx\""
+        # Создаем новый Excel файл
+        stringio = StringIO.new
+        workbook = WriteXLSX.new(stringio)
+        worksheet = workbook.add_worksheet("Акт ремонта #{@batch.repair_number}")
+        
+        # Стили
+        header_format = workbook.add_format(
+          bold: true,
+          bg_color: '#f3f4f6',
+          border: 1,
+          align: 'center',
+          valign: 'vcenter'
+        )
+        cell_format = workbook.add_format(
+          border: 1,
+          align: 'left',
+          valign: 'vcenter'
+        )
+        title_format = workbook.add_format(
+          bold: true,
+          size: 16,
+          align: 'center'
+        )
+        
+        # Заголовок
+        worksheet.merge_range('A1:F1', "Акт передачи в ремонт №#{@batch.repair_number}", title_format)
+        worksheet.set_row(0, 30)
+        
+        # Информация об акте
+        worksheet.write('A3', 'Номер акта:', header_format)
+        worksheet.write('B3', @batch.repair_number, cell_format)
+        worksheet.write('A4', 'Дата создания:', header_format)
+        worksheet.write('B4', l(@batch.created_at, format: :long), cell_format)
+        worksheet.write('A5', 'Создал:', header_format)
+        worksheet.write('B5', @batch.user&.full_name || "—", cell_format)
+        worksheet.write('A6', 'Статус:', header_format)
+        worksheet.write('B6', @batch.status_text, cell_format)
+        worksheet.write('A7', 'Количество оборудования:', header_format)
+        worksheet.write('B7', "#{@batch.equipment_count} ед.", cell_format)
+        
+        # Заголовки таблицы
+        headers = ['№', 'Тип', 'Модель', 'Инв. №', 'Сер. №', 'Номер заявки']
+        headers.each_with_index do |header, index|
+          worksheet.write(9, index, header, header_format)
+        end
+        
+        # Данные оборудования
+        @batch.repair_batch_items.each_with_index do |item, index|
+          worksheet.write(10 + index, 0, index + 1, cell_format)
+          worksheet.write(10 + index, 1, item.equipment_type_display, cell_format)
+          worksheet.write(10 + index, 2, item.model || "—", cell_format)
+          worksheet.write(10 + index, 3, item.inventory_number, cell_format)
+          worksheet.write(10 + index, 4, item.serial_number || "—", cell_format)
+          worksheet.write(10 + index, 5, item.repair_ticket_number || "—", cell_format)
+        end
+        
+        # Устанавливаем ширину колонок
+        worksheet.set_column('A:A', 5)  # №
+        worksheet.set_column('B:B', 10) # Тип
+        worksheet.set_column('C:C', 20) # Модель
+        worksheet.set_column('D:D', 15) # Инв. №
+        worksheet.set_column('E:E', 15) # Сер. №
+        worksheet.set_column('F:F', 15) # Номер заявки
+        
+        # Отправляем файл
+        workbook.close
+        send_data stringio.string, 
+                  filename: "Акт_ремонта_#{@batch.repair_number}.xlsx",
+                  type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       }
     end
   end
@@ -204,7 +326,31 @@ class RepairsController < ApplicationController
     @top_models = base_items.reorder(nil).group(:model).count.sort_by { |_, v| -v }.first(5)
   end
 
+  # PATCH /repairs/:id/update_ticket_number
+  def update_ticket_number
+    equipment = find_equipment_by_type_and_id(params[:id], params[:type])
+    
+    if equipment&.update(repair_ticket_number: params[:ticket_number])
+      render turbo_stream: turbo_stream.replace("ticket-number-#{params[:id]}", 
+        partial: "repairs/ticket_number_cell", 
+        locals: { equipment: equipment })
+    else
+      head :unprocessable_entity
+    end
+  end
+
   private
+
+  def find_equipment_by_type_and_id(id, type)
+    case type
+    when "CuteEquipment"
+      CuteEquipment.find_by(id: id)
+    when "FidsEquipment"
+      FidsEquipment.find_by(id: id)
+    when "ZamarEquipment"
+      ZamarEquipment.find_by(id: id)
+    end
+  end
 
   def collect_equipment_types
     types = []

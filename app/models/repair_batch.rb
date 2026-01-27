@@ -21,6 +21,10 @@ class RepairBatch < ApplicationRecord
     "closed" => "Закрыто"
   }.freeze
 
+  def self.statuses
+    STATUSES.keys
+  end
+
   def status_text
     STATUSES[status] || status.humanize
   end

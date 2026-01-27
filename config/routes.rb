@@ -65,6 +65,15 @@ Rails.application.routes.draw do
     # Audit logs
     resources :audit_logs, only: [:index, :show]
 
+    # Акты ремонта
+    namespace :repairs do
+      resources :acts, only: [:index, :show] do
+        member do
+          get :export_to_excel
+        end
+      end
+    end
+
     # Ремонт
     resources :repairs, only: [:index, :show] do
       collection do
@@ -72,6 +81,7 @@ Rails.application.routes.draw do
         get :history
       end
       member do
+        patch :update_ticket_number
         get :export_to_excel
       end
     end

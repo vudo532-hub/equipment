@@ -29,6 +29,15 @@ class User < ApplicationRecord
   # For audited - track who made changes
   has_associated_audits
 
+  # Ransack configuration for search functionality
+  def self.ransackable_attributes(auth_object = nil)
+    %w[id first_name last_name email created_at updated_at role]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[api_tokens associated_audits cute_equipments cute_installations fids_equipments fids_installations]
+  end
+
   # Full name for display
   def full_name
     "#{first_name} #{last_name}".strip
