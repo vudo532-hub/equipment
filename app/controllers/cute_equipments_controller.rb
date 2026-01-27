@@ -51,11 +51,14 @@ class CuteEquipmentsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "equipment-modal-frame",
-          partial: "shared/equipment_form",
-          locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
-        )
+        render turbo_stream: [
+          turbo_stream.replace(
+            "equipment-modal-frame",
+            partial: "shared/equipment_form",
+            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+          ),
+          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').style.display = 'block'; document.getElementById('equipment-modal').setAttribute('aria-hidden', 'false');</script>".html_safe)
+        ]
       end
     end
   end
