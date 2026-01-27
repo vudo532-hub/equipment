@@ -104,21 +104,60 @@ class CuteEquipmentsController < ApplicationController
 
   def edit
     @installations = CuteInstallation.ordered
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "equipment-modal-frame",
+          partial: "shared/equipment_form",
+          locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+        )
+      end
+    end
   end
 
   def update
     @equipment.last_changed_by = current_user
     @equipment.current_user_admin = current_user.admin?
-    
+
     if @equipment.update(equipment_params)
-      if params[:from] == 'show'
-        redirect_to cute_equipment_path(@equipment), notice: t("flash.updated", resource: CuteEquipment.model_name.human)
-      else
-        redirect_to cute_equipments_path, notice: t("flash.updated", resource: CuteEquipment.model_name.human)
+      respond_to do |format|
+        format.html do
+          if params[:from] == 'show'
+            redirect_to cute_equipment_path(@equipment), notice: t("flash.updated", resource: CuteEquipment.model_name.human)
+          else
+            redirect_to cute_equipments_path, notice: t("flash.updated", resource: CuteEquipment.model_name.human)
+          end
+        end
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("equipment-modal-frame", ""),
+            turbo_stream.replace("equipment-row-#{@equipment.id}",
+              partial: "shared/equipment_row",
+              locals: { equipment: @equipment, equipment_type: "cute" }
+            ),
+            turbo_stream.replace("flash-messages",
+              partial: "shared/flash_message",
+              locals: { message: t("flash.updated", resource: CuteEquipment.model_name.human), type: "success" }
+            )
+          ]
+        end
       end
     else
       @installations = CuteInstallation.ordered
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          render :edit, status: :unprocessable_entity
+        end
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "equipment-modal-frame",
+            partial: "shared/equipment_form",
+            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+          ), status: :unprocessable_entity
+        end
+      end
     end
   end
 

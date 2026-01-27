@@ -9,6 +9,7 @@ export default class extends Controller {
   }
 
   open() {
+    this.element.style.display = "block"
     this.element.setAttribute("aria-hidden", "false")
     this.backdropTarget.classList.remove("opacity-0")
     this.backdropTarget.classList.add("opacity-100")
@@ -24,6 +25,11 @@ export default class extends Controller {
     this.contentTarget.classList.remove("opacity-100", "scale-100")
     this.contentTarget.classList.add("opacity-0", "scale-95")
     document.body.classList.remove("overflow-hidden")
+    
+    // Hide after animation
+    setTimeout(() => {
+      this.element.style.display = "none"
+    }, 300)
   }
 
   // Close modal when clicking on backdrop

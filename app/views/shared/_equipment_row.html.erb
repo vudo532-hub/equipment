@@ -1,4 +1,4 @@
-<tr class="hover:bg-gray-50 mt-4">
+<tr id="equipment-row-<%= equipment.id %>" class="hover:bg-gray-50 mt-4">
   <td class="px-4 py-4 whitespace-nowrap" style="cursor: pointer;" onclick="window.location='<%= send("#{equipment_type}_equipment_path", equipment) %>'">
     <div class="text-sm font-medium text-gray-900"><%= equipment.equipment_type_text %></div>
     <% if equipment.send(equipment_model_field(equipment_type)).present? %>
