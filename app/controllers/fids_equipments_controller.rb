@@ -1,6 +1,20 @@
 class FidsEquipmentsController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :audit_history]
+  before_action :authe  def edit
+    @installations = FidsInstallation.ordered
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace(
+            "equipment-modal-frame",
+            partial: "shared/equipment_form",
+            locals: { equipment: @equipment, equipment_type: "fids", installations: @installations }
+          ),
+          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').style.display = 'block'; document.getElementById('equipment-modal').setAttribute('aria-hidden', 'false');</script>".html_safe)
+        ]
+      end
+    endfore_action :set_equipment, only: [:show, :edit, :update, :destroy, :audit_history]
   before_action :require_delete_permission, only: [:destroy]
 
   def index
@@ -28,9 +42,7 @@ class FidsEquipmentsController < ApplicationController
             partial: "shared/equipment_form",
             locals: { equipment: @equipment, equipment_type: "fids", installations: @installations }
           ),
-          turbo_stream.replace("equipment-modal", 
-            '<div id="equipment-modal" data-controller="modal" class="fixed inset-0 z-50 overflow-y-auto" style="display: block;" aria-hidden="false" data-action="keydown@window->modal#escapeKey"><!-- existing modal content --></div>'.html_safe
-          )
+          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').style.display = 'block'; document.getElementById('equipment-modal').setAttribute('aria-hidden', 'false');</script>".html_safe)
         ]
       end
     end
