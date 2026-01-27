@@ -6,14 +6,22 @@ export default class extends Controller {
     console.log("Modal controller connected")
     this.element.setAttribute("aria-hidden", "true")
     this.element.style.display = "none"
+    
+    // Check if modal should be open on connect
+    if (this.element.style.display === "block" || this.element.getAttribute("aria-hidden") === "false") {
+      console.log("Modal is already open, setting up properly")
+      this.showModalElements()
+    }
   }
 
   open() {
     console.log("Modal open called")
+    this.showModalElements()
+  }
+
+  showModalElements() {
     const backdrop = this.element.querySelector('[data-modal-target="backdrop"]')
     const content = this.element.querySelector('[data-modal-target="content"]')
-    console.log("Backdrop element:", backdrop)
-    console.log("Content element:", content)
     
     if (backdrop && content) {
       this.element.style.display = "block"
