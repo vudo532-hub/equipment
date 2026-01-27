@@ -43,10 +43,10 @@ cute_installation_types = ["Стойка регистрации", "Гейт", "�
 fids_installation_types = ["Табло вылета", "Табло прилёта", "Информационный монитор", "Гейт-дисплей"]
 
 # Типы оборудования CUTE
-cute_equipment_types = ["Компьютер", "Монитор", "Принтер посадочных", "Принтер багажных бирок", "Сканер паспортов", "Считыватель карт"]
+cute_equipment_types = [:computer, :monitor, :boarding_pass_printer, :baggage_tag_printer, :scanner, :gate_reader]
 
 # Типы оборудования FIDS
-fids_equipment_types = ["LED-панель", "LCD-монитор", "Медиаплеер", "Контроллер", "Сетевой коммутатор"]
+fids_equipment_types = [:led_panel, :lcd_monitor, :media_player, :controller, :network_switch]
 
 # Создание мест установки CUTE
 puts "Создание мест установки CUTE..."
@@ -80,18 +80,27 @@ puts "Создано мест установки FIDS: #{fids_installations.coun
 
 # Создание оборудования CUTE
 puts "Создание оборудования CUTE..."
-statuses = [:active, :active, :active, :inactive, :maintenance]
-30.times do |i|
-  CuteEquipment.find_or_create_by!(
-    user: user,
-    inventory_number: "INV-CUTE-#{format('%04d', i + 1)}"
-  ) do |eq|
-    eq.equipment_type = cute_equipment_types.sample
-    eq.equipment_model = ["Dell OptiPlex 7090", "HP ProDesk 400", "Lenovo ThinkCentre", "HP LaserJet", "Zebra ZD421", "3M CR100"].sample
-    eq.serial_number = "SN#{SecureRandom.hex(6).upcase}"
-    eq.status = statuses.sample
-    eq.cute_installation = cute_installations.sample
-    eq.note = ["", "", "", "Требует проверки", "Новое оборудование", "Гарантия до 2027"].sample
+statuses = [:active, :active, :active, :maintenance]
+cute_installations.each do |installation|
+  # Для каждого места установки создаём 1-3 устройства разных типов
+  equipment_count = rand(1..3)
+  available_types = cute_equipment_types.shuffle
+  
+  equipment_count.times do |j|
+    next if available_types.empty?
+    equipment_type = available_types.pop
+    
+    CuteEquipment.find_or_create_by!(
+      user: user,
+      inventory_number: "INV-CUTE-#{installation.id}-#{format('%02d', j + 1)}"
+    ) do |eq|
+      eq.equipment_type = equipment_type
+      eq.equipment_model = ["Dell OptiPlex 7090", "HP ProDesk 400", "Lenovo ThinkCentre", "HP LaserJet", "Zebra ZD421", "3M CR100"].sample
+      eq.serial_number = "SN#{SecureRandom.hex(6).upcase}"
+      eq.status = statuses.sample
+      eq.cute_installation = installation
+      eq.note = ["", "", "", "Требует проверки", "Новое оборудование", "Гарантия до 2027"].sample
+    end
   end
 end
 puts "Создано оборудования CUTE: #{CuteEquipment.count}"
