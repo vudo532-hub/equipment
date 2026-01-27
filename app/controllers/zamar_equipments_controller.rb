@@ -28,7 +28,7 @@ class ZamarEquipmentsController < ApplicationController
             partial: "shared/equipment_form",
             locals: { equipment: @equipment, equipment_type: "zamar", installations: @installations }
           ),
-          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').style.display = 'block'; document.getElementById('equipment-modal').setAttribute('aria-hidden', 'false');</script>".html_safe)
+          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').classList.remove('hidden'); document.body.classList.add('overflow-hidden');</script>".html_safe)
         ]
       end
     end
@@ -87,7 +87,7 @@ class ZamarEquipmentsController < ApplicationController
             partial: "shared/equipment_form",
             locals: { equipment: @equipment, equipment_type: "zamar", installations: @installations }
           ),
-          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').style.display = 'block'; document.getElementById('equipment-modal').setAttribute('aria-hidden', 'false');</script>".html_safe)
+          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').classList.remove('hidden'); document.body.classList.add('overflow-hidden');</script>".html_safe)
         ]
       end
     end
