@@ -18,6 +18,17 @@ class FidsEquipmentsController < ApplicationController
     @equipment = FidsEquipment.new
     @equipment.fids_installation_id = params[:fids_installation_id] if params[:fids_installation_id].present?
     @installations = FidsInstallation.ordered
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "equipment-modal-frame",
+          partial: "shared/equipment_form",
+          locals: { equipment: @equipment, equipment_type: "fids", installations: @installations }
+        )
+      end
+    end
   end
 
   def create
@@ -26,10 +37,38 @@ class FidsEquipmentsController < ApplicationController
     @equipment.last_changed_by = current_user
 
     if @equipment.save
-      redirect_to fids_equipments_path, notice: t("flash.created", resource: FidsEquipment.model_name.human)
+      respond_to do |format|
+        format.html do
+          redirect_to fids_equipments_path, notice: t("flash.created", resource: FidsEquipment.model_name.human)
+        end
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("equipment-modal-frame", ""),
+            turbo_stream.append("equipment-table-body",
+              partial: "shared/equipment_row",
+              locals: { equipment: @equipment, equipment_type: "fids" }
+            ),
+            turbo_stream.replace("flash-messages",
+              partial: "shared/flash_message",
+              locals: { message: t("flash.created", resource: FidsEquipment.model_name.human), type: "success" }
+            )
+          ]
+        end
+      end
     else
       @installations = FidsInstallation.ordered
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          render :new, status: :unprocessable_entity
+        end
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "equipment-modal-frame",
+            partial: "shared/equipment_form",
+            locals: { equipment: @equipment, equipment_type: "fids", installations: @installations }
+          ), status: :unprocessable_entity
+        end
+      end
     end
   end
 

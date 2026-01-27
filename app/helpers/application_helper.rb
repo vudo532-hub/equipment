@@ -83,6 +83,23 @@ module ApplicationHelper
     end
   end
 
+  # Render status badge
+  def render_status_badge(status)
+    status_str = status.is_a?(Integer) ? CuteEquipment.statuses.key(status) : status.to_s
+    status_text = case status_str
+    when "active" then "В работе"
+    when "maintenance" then "В ремонт"
+    when "waiting_repair" then "Ожидает ремонта"
+    when "ready_to_dispatch" then "Готово к выдаче"
+    when "decommissioned" then "Списание"
+    when "transferred" then "Передано"
+    when "with_note" then "С примечанием"
+    else status_str.humanize
+    end
+
+    content_tag(:span, status_text, class: "px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full #{status_badge_color(status)}")
+  end
+
   # Форматирование аудит-лога
   def format_audit_action(audit, model_class = nil)
     case audit.action
@@ -322,6 +339,143 @@ module ApplicationHelper
       end
     else
       value.to_s.truncate(100)
+    end
+  end
+
+  # Helper methods for equipment modal forms
+  def equipment_options_for_select(equipment_type)
+    case equipment_type
+    when 'cute'
+      [
+        ["Принтер посадочных талонов", "boarding_pass_printer"],
+        ["Принтер багажных бирок", "baggage_tag_printer"],
+        ["Клавиатура", "keyboard"],
+        ["Сканер", "scanner"],
+        ["Считыватель на гейте", "gate_reader"],
+        ["Принтер полётной документации", "flight_document_printer"],
+        ["Монитор", "monitor"],
+        ["Компьютер", "computer"],
+        ["Прочее", "other"]
+      ]
+    when 'fids'
+      [
+        ["Монитор FIDS", "fids_monitor"],
+        ["Сервер FIDS", "fids_server"],
+        ["Принтер FIDS", "fids_printer"],
+        ["Сеть FIDS", "fids_network"],
+        ["Прочее", "other"]
+      ]
+    when 'zamar'
+      [
+        ["Принтер ZAMAR", "zamar_printer"],
+        ["Сканер ZAMAR", "zamar_scanner"],
+        ["Терминал ZAMAR", "zamar_terminal"],
+        ["Сервер ZAMAR", "zamar_server"],
+        ["Прочее", "other"]
+      ]
+    else
+      []
+    end
+  end
+
+  def status_options_for_select
+    [
+      ["В работе", "active"],
+      ["В ремонт", "maintenance"],
+      ["Ожидается из ремонта", "waiting_repair"],
+      ["Готово к выдачи", "ready_to_dispatch"],
+      ["Списание", "decommissioned"],
+      ["Передано в другое место", "transferred"],
+      ["С примечанием", "with_note"]
+    ]
+  end
+
+  def equipment_model_field(equipment_type)
+    case equipment_type
+    when 'cute' then :equipment_model
+    when 'fids' then :equipment_model
+    when 'zamar' then :equipment_model
+    else :equipment_model
+    end
+  end
+
+  def installation_field(equipment_type)
+    case equipment_type
+    when 'cute' then :cute_installation_id
+    when 'fids' then :fids_installation_id
+    when 'zamar' then :zamar_installation_id
+    else :installation_id
+    end
+  end
+
+  def installation_label(equipment_type)
+    case equipment_type
+    when 'cute' then "Место установки"
+    when 'fids' then "Место установки"
+    when 'zamar' then "Место установки"
+    else "Место установки"
+    end
+  end
+
+  # Flash message helpers
+  def flash_class(type)
+    case type.to_s
+    when "success" then "bg-green-50 border-l-4 border-green-400 p-4"
+    when "error" then "bg-red-50 border-l-4 border-red-400 p-4"
+    when "warning" then "bg-yellow-50 border-l-4 border-yellow-400 p-4"
+    when "info" then "bg-blue-50 border-l-4 border-blue-400 p-4"
+    else "bg-gray-50 border-l-4 border-gray-400 p-4"
+    end
+  end
+
+  def flash_icon(type)
+    case type.to_s
+    when "success"
+      '<svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>'.html_safe
+    when "error"
+      '<svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 00-1.414 1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>'.html_safe
+    when "warning"
+      '<svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>'.html_safe
+    else
+      '<svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>'.html_safe
+    end
+  end
+
+  def flash_text_color(type)
+    case type.to_s
+    when "success" then "text-green-800"
+    when "error" then "text-red-800"
+    when "warning" then "text-yellow-800"
+    when "info" then "text-blue-800"
+    else "text-gray-800"
+    end
+  end
+
+  def flash_bg_hover_color(type)
+    case type.to_s
+    when "success" then "green-100"
+    when "error" then "red-100"
+    when "warning" then "yellow-100"
+    when "info" then "blue-100"
+    else "gray-100"
+    end
+  end
+
+  def flash_ring_color(type)
+    case type.to_s
+    when "success" then "green-500"
+    when "error" then "red-500"
+    when "warning" then "yellow-500"
+    when "info" then "blue-500"
+    else "gray-500"
     end
   end
 end

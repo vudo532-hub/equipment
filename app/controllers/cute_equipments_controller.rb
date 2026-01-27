@@ -47,6 +47,17 @@ class CuteEquipmentsController < ApplicationController
     @equipment = CuteEquipment.new
     @equipment.cute_installation_id = params[:cute_installation_id] if params[:cute_installation_id].present?
     @installations = CuteInstallation.ordered
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "equipment-modal-frame",
+          partial: "shared/equipment_form",
+          locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+        )
+      end
+    end
   end
 
   def create
@@ -56,10 +67,38 @@ class CuteEquipmentsController < ApplicationController
     @equipment.current_user_admin = current_user.admin?
 
     if @equipment.save
-      redirect_to cute_equipments_path, notice: t("flash.created", resource: CuteEquipment.model_name.human)
+      respond_to do |format|
+        format.html do
+          redirect_to cute_equipments_path, notice: t("flash.created", resource: CuteEquipment.model_name.human)
+        end
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("equipment-modal-frame", ""),
+            turbo_stream.append("equipment-table-body",
+              partial: "shared/equipment_row",
+              locals: { equipment: @equipment, equipment_type: "cute" }
+            ),
+            turbo_stream.replace("flash-messages",
+              partial: "shared/flash_message",
+              locals: { message: t("flash.created", resource: CuteEquipment.model_name.human), type: "success" }
+            )
+          ]
+        end
+      end
     else
       @installations = CuteInstallation.ordered
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          render :new, status: :unprocessable_entity
+        end
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "equipment-modal-frame",
+            partial: "shared/equipment_form",
+            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+          ), status: :unprocessable_entity
+        end
+      end
     end
   end
 
