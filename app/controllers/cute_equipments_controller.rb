@@ -1,6 +1,42 @@
 class CuteEquipmentsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
+  before_action :set_equipment, only  def edit
+    @installations = CuteInstallation.ordered
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace("equipment-modal", 
+            '<div id="equipment-modal" class="fixed inset-0 z-50 overflow-y-auto bg-gray-500 bg-opacity-75" data-controller="modal" data-action="keydown@window->modal#escapeKey">
+              <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl max-w-2xl w-full">
+                  <div class="absolute top-0 right-0 pt-4 pr-4">
+                    <button type="button" data-action="click->modal#close" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                      <span class="sr-only">Закрыть</span>
+                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-6">
+                    <turbo-frame id="equipment-modal-frame">
+                    </turbo-frame>
+                  </div>
+                </div>
+              </div>
+            </div>'.html_safe
+          ),
+          turbo_stream.replace(
+            "equipment-modal-frame",
+            partial: "shared/equipment_form",
+            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+          ),
+          turbo_stream.append("body", "<script>document.body.classList.add('overflow-hidden');</script>".html_safe)
+        ]
+      end
+    end
+  end:update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
   before_action :require_delete_permission, only: [:destroy]
 
   def index
