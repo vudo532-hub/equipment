@@ -438,4 +438,44 @@
   .min-h-\[2rem\] {
     min-height: 1.5rem !important;
   }
+  
+  /* Remove borders and shadows for print */
+  .bg-white.shadow.rounded-lg {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Remove padding from info and equipment blocks */
+  .px-4.py-5.sm\:p-6 {
+    padding: 0 !important;
+  }
+  
+  /* Remove table borders in signatures section */
+  table.min-w-full {
+    border-collapse: collapse !important;
+  }
+  
+  table.min-w-full th,
+  table.min-w-full td {
+    border: none !important;
+  }
+}
+
+/* Print-specific display utilities */
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
 }

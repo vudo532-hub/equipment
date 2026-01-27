@@ -16,7 +16,7 @@
     <div class="flex justify-between items-start">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Акт передачи в ремонт</h1>
-        <p class="mt-1 text-sm text-gray-600"><%= @batch.repair_number %></p>
+        <p class="mt-1 text-sm text-gray-600 screen-only"><%= @batch.repair_number %></p>
       </div>
       <div class="flex gap-2">
         <button onclick="window.print()" class="inline-flex items-center px-4 cursor-pointer py-2 border border-blue-600 rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-blue-50">
@@ -38,32 +38,46 @@
   <!-- Info Card -->
   <div class="bg-white shadow rounded-lg mb-6">
     <div class="px-4 py-5 sm:p-6">
-      <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Номер акта</dt>
-          <dd class="mt-1 text-lg font-semibold text-gray-900"><%= @batch.repair_number %></dd>
+      <!-- Screen version -->
+      <div class="screen-only">
+        <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Номер акта</dt>
+            <dd class="mt-1 text-lg font-semibold text-gray-900"><%= @batch.repair_number %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Дата создания</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= l(@batch.created_at, format: :long) %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Создал</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @batch.user&.full_name || "—" %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Статус</dt>
+            <dd class="mt-1">
+              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <%= @batch.status_color %>">
+                <%= @batch.status_text %>
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Количество оборудования</dt>
+            <dd class="mt-1 text-lg font-semibold text-orange-600"><%= @batch.equipment_count %> ед.</dd>
+          </div>
+        </dl>
+      </div>
+      
+      <!-- Print version -->
+      <div class="print-only hidden">
+        <div class="space-y-1 text-sm">
+          <div><strong>Номер акта:</strong> <%= @batch.repair_number %></div>
+          <div><strong>Дата создания:</strong> <%= l(@batch.created_at, format: :long) %></div>
+          <div><strong>Создал:</strong> <%= @batch.user&.full_name || "—" %></div>
+          <div><strong>Количество оборудования:</strong> <%= @batch.equipment_count %> ед.</div>
+          <div><strong>Статус:</strong> <%= @batch.status_text %></div>
         </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Дата создания</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= l(@batch.created_at, format: :long) %></dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Создал</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @batch.user&.full_name || "—" %></dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Статус</dt>
-          <dd class="mt-1">
-            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <%= @batch.status_color %>">
-              <%= @batch.status_text %>
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Количество оборудования</dt>
-          <dd class="mt-1 text-lg font-semibold text-orange-600"><%= @batch.equipment_count %> ед.</dd>
-        </div>
-      </dl>
+      </div>
     </div>
   </div>
 
@@ -113,7 +127,7 @@
   </div>
 
   <!-- Signatures Section -->
-    <div class="bg-white shadow rounded-lg mt-6">
+    <div class="bg-white rounded-lg mt-6 print-only hidden">
       <div class="px-4 py-5 sm:p-6">
         <!--<h3 class="text-lg font-medium text-gray-900 mb-6">Подписи</h3>-->
         <div class="overflow-x-auto">
