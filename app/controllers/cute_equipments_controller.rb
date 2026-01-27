@@ -72,7 +72,11 @@ class CuteEquipmentsController < ApplicationController
     @equipment.current_user_admin = current_user.admin?
     
     if @equipment.update(equipment_params)
-      redirect_to cute_equipment_path(@equipment), notice: t("flash.updated", resource: CuteEquipment.model_name.human)
+      if params[:from] == 'show'
+        redirect_to cute_equipment_path(@equipment), notice: t("flash.updated", resource: CuteEquipment.model_name.human)
+      else
+        redirect_to cute_equipments_path, notice: t("flash.updated", resource: CuteEquipment.model_name.human)
+      end
     else
       @installations = CuteInstallation.ordered
       render :edit, status: :unprocessable_entity

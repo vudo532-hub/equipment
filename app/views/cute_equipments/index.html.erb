@@ -165,7 +165,7 @@
                 <% end %>
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm font-medium" style="text-align: right;">
-                <%= link_to "Изменить", edit_cute_equipment_path(equipment), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                <%= link_to "Изменить", edit_cute_equipment_path(equipment, from: 'index'), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
                 <% if can_delete? %>
                   <%= link_to "Удалить", cute_equipment_path(equipment), 
                       data: { turbo_method: :delete, turbo_confirm: "Вы уверены, что хотите удалить это оборудование?" },

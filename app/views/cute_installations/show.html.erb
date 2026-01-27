@@ -123,6 +123,7 @@
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Тип</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Модель</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Инв. №</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Серийный №</th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Действия</th>
               </tr>
@@ -135,6 +136,7 @@
                   </td>
                   <td class="px-4 py-2 text-sm text-gray-500"><%= equipment.equipment_model || "—" %></td>
                   <td class="px-4 py-2 text-sm text-gray-500"><%= equipment.inventory_number %></td>
+                  <td class="px-4 py-2 text-sm text-gray-500"><%= equipment.serial_number %></td>
                   <td class="px-4 py-2">
                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <%= equipment.status_color %>">
                       <%= equipment.status_text %>
