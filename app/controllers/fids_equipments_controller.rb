@@ -1,20 +1,6 @@
 class FidsEquipmentsController < ApplicationController
-  before_action :authe  def edit
-    @installations = FidsInstallation.ordered
-
-    respond_to do |format|
-      format.html
-      format.turbo_stream do
-        render turbo_stream: [
-          turbo_stream.replace(
-            "equipment-modal-frame",
-            partial: "shared/equipment_form",
-            locals: { equipment: @equipment, equipment_type: "fids", installations: @installations }
-          ),
-          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').style.display = 'block'; document.getElementById('equipment-modal').setAttribute('aria-hidden', 'false');</script>".html_safe)
-        ]
-      end
-    endfore_action :set_equipment, only: [:show, :edit, :update, :destroy, :audit_history]
+  before_action :authenticate_user!
+  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
   before_action :require_delete_permission, only: [:destroy]
 
   def index
