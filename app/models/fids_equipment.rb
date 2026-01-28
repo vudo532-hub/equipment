@@ -67,6 +67,11 @@ class FidsEquipment < ApplicationRecord
     I18n.t("equipment_statuses.#{status}", default: status.to_s.humanize)
   end
 
+  def equipment_type_text
+    return "—" if equipment_type.blank?
+    I18n.t("fids_equipment_types.#{equipment_type}", default: equipment_type.to_s.humanize)
+  end
+
   # Ransack configuration
   def self.ransackable_attributes(auth_object = nil)
     %w[equipment_type equipment_model inventory_number serial_number status note created_at updated_at last_action_date fids_installation_id]
