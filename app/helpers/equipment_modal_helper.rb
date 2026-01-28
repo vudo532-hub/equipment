@@ -76,6 +76,30 @@ module EquipmentModalHelper
     end
   end
 
+  # Get installation field name for equipment type
+  def installation_field_name(type)
+    case type
+    when 'cute'
+      :cute_installation_id
+    when 'fids'
+      :fids_installation_id
+    when 'zamar'
+      :zamar_installation_id
+    end
+  end
+
+  # Get installation association value for equipment type
+  def installation_id_for_equipment(equipment, type)
+    case type
+    when 'cute'
+      equipment.cute_installation_id
+    when 'fids'
+      equipment.fids_installation_id
+    when 'zamar'
+      equipment.zamar_installation_id
+    end
+  end
+
   # Generate link for opening modal to add equipment
   def add_equipment_modal_link(type, classes = "")
     path = case type
