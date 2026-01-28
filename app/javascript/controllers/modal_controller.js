@@ -6,8 +6,8 @@ export default class extends Controller {
   connect() {
     // Слушаем загрузку контента в Turbo Frame
     this.setupFrameListener()
-    // Слушаем Turbo событие для закрытия модального окна
-    this.setupModalCloseListener()
+    // Слушаем успешную отправку формы
+    this.setupFormSubmitListener()
   }
 
   setupFrameListener() {
@@ -20,17 +20,16 @@ export default class extends Controller {
     }
   }
 
-  setupModalCloseListener() {
+  setupFormSubmitListener() {
+    // Слушаем успешную отправку формы
     document.addEventListener("turbo:submit-end", (event) => {
-      // Закрываем модальное окно после успешной формы
-      if (event.detail.success) {
-        this.closeModal()
+      // Проверяем, что форма успешно отправлена
+      if (event.detail && event.detail.success) {
+        // Закрываем модальное окно после успешной отправки
+        setTimeout(() => {
+          this.closeModal()
+        }, 100)
       }
-    })
-    
-    // Слушаем пользовательское событие close:modal от turbo_stream.dispatch
-    window.addEventListener("close:modal", () => {
-      this.closeModal()
     })
   }
 
