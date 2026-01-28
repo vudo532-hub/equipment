@@ -32,7 +32,7 @@
   <% end %>
 
   <%# Form %>
-  <%= form_with(model: equipment, url: form_path_for_equipment(equipment, equipment_type), local: true, class: "space-y-6") do |form| %>
+  <%= form_with(model: equipment, url: form_path_for_equipment(equipment, equipment_type), local: true, class: "space-y-6", data: { turbo_frame: "equipment-modal-frame" }) do |form| %>
     <%# Equipment Type %>
     <div class="grid grid-cols-1 sm:grid-cols-2" style="gap: 16px;">
       <div>

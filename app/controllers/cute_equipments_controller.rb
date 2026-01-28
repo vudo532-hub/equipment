@@ -141,12 +141,12 @@ class CuteEquipmentsController < ApplicationController
             turbo_stream.replace("flash-messages",
               partial: "shared/flash_message",
               locals: { message: t("flash.updated", resource: CuteEquipment.model_name.human), type: "success" }
+            ),
+            turbo_stream.replace("equipment-row-#{@equipment.id}",
+              partial: "shared/equipment_row",
+              locals: { equipment: @equipment, equipment_type: "cute" }
             )
           ]
-          updates << turbo_stream.replace("equipment-row-#{@equipment.id}",
-            partial: "shared/equipment_row",
-            locals: { equipment: @equipment, equipment_type: "cute" }
-          ) if turbo_request_from_modal?
           render turbo_stream: updates
         end
       end
