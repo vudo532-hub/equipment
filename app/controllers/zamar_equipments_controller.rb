@@ -107,6 +107,7 @@ class ZamarEquipmentsController < ApplicationController
         format.turbo_stream do
           updates = [
             turbo_stream.replace("equipment-modal-frame", ""),
+            turbo_stream.dispatch("close:modal"),
             turbo_stream.replace("flash-messages",
               partial: "shared/flash_message",
               locals: { message: t("flash.updated", resource: ZamarEquipment.model_name.human), type: "success" }

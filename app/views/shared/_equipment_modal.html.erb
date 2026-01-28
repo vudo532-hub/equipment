@@ -35,10 +35,12 @@
     }
   }
 
-  // Слушаем успешное сохранение (Turbo Stream заменит пустое содержимое)
-  document.querySelector('turbo-frame#equipment-modal-frame').addEventListener('turbo:load', function(e) {
-    // Если контент пустой - закрываем модальное окно
-    if (!e.target.innerHTML.trim()) {
+  // Слушаем успешное сохранение через Turbo Stream
+  document.addEventListener('turbo:submit-end', function(e) {
+    // Если форма в модальном окне успешно отправлена, закрываем модальное окно
+    const modal = document.getElementById('equipment-modal');
+    const isModalVisible = !modal.classList.contains('hidden');
+    if (isModalVisible && e.detail && e.detail.success) {
       setTimeout(() => {
         closeEquipmentModal();
       }, 100);
