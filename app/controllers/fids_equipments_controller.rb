@@ -49,12 +49,12 @@ class FidsEquipmentsController < ApplicationController
             turbo_stream.replace("flash-messages",
               partial: "shared/flash_message",
               locals: { message: t("flash.created", resource: FidsEquipment.model_name.human), type: "success" }
+            ),
+            turbo_stream.append("equipment-table-body",
+              partial: "shared/equipment_row",
+              locals: { equipment: @equipment, equipment_type: "fids" }
             )
           ]
-          updates << turbo_stream.append("equipment-table-body",
-            partial: "shared/equipment_row",
-            locals: { equipment: @equipment, equipment_type: "fids" }
-          ) if turbo_request_from_modal?
           render turbo_stream: updates
         end
       end
