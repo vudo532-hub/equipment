@@ -13,7 +13,6 @@
         Экспорт Excel
       <% end %>
       <a href="<%= new_zamar_equipment_path(format: :turbo_stream) %>"
-         onclick="openEquipmentModal(); return false;"
          data-turbo-frame="equipment-modal-frame"
          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 cursor-pointer">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +164,6 @@
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm font-medium" style="text-align: right;">
                 <a href="<%= edit_zamar_equipment_path(equipment, format: :turbo_stream) %>"
-                   onclick="openEquipmentModal(); return false;"
                    data-turbo-frame="equipment-modal-frame"
                    class="text-indigo-600 hover:text-indigo-900 mr-4 cursor-pointer">
                   <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -22,8 +22,9 @@
 
 <script>
   function openEquipmentModal() {
-    document.getElementById('equipment-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    // Не открываем модальное окно сразу - оно откроется когда загрузится форма
+    // document.getElementById('equipment-modal').classList.remove('hidden');
+    // document.body.style.overflow = 'hidden';
   }
 
   function closeEquipmentModal() {
@@ -34,6 +35,21 @@
       frame.innerHTML = '';
     }
   }
+
+  // Открываем модальное окно когда форма полностью загрузилась
+  document.addEventListener('turbo:load', function(e) {
+    // Проверяем что это загрузка в наш фрейм
+    if (e.target && e.target.id === 'equipment-modal-frame') {
+      const modal = document.getElementById('equipment-modal');
+      // Проверяем что форма не пустая
+      const form = e.target.querySelector('form');
+      if (form && modal) {
+        // Открываем модальное окно только когда форма полностью загрузилась
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+  });
 
   // Слушаем успешное сохранение через Turbo Stream
   document.addEventListener('turbo:submit-end', function(e) {
