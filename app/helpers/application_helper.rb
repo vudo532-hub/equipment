@@ -417,28 +417,6 @@ module ApplicationHelper
     end
   end
 
-  def equipment_model_field(equipment_type)
-    case equipment_type
-    when 'cute' then :equipment_model
-    when 'fids' then :equipment_model
-    when 'zamar' then :equipment_model
-    else :equipment_model
-    end
-  end
-
-  def equipment_options_for_select(equipment_type)
-    case equipment_type
-    when 'cute'
-      CuteEquipment.equipment_types.map { |key, value| [I18n.t("cute_equipment_types.#{key}", default: key.to_s.humanize), key] }
-    when 'fids'
-      [] # FIDS uses text field for equipment_type
-    when 'zamar'
-      [] # ZAMAR uses text field for equipment_type
-    else
-      []
-    end
-  end
-
   # Flash message helpers
   def flash_class(type)
     case type.to_s

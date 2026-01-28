@@ -1,42 +1,6 @@
 class CuteEquipmentsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_equipment, only  def edit
-    @installations = CuteInstallation.ordered
-
-    respond_to do |format|
-      format.html
-      format.turbo_stream do
-        render turbo_stream: [
-          turbo_stream.replace("equipment-modal", 
-            '<div id="equipment-modal" class="fixed inset-0 z-50 overflow-y-auto bg-gray-500 bg-opacity-75" data-controller="modal" data-action="keydown@window->modal#escapeKey">
-              <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl max-w-2xl w-full">
-                  <div class="absolute top-0 right-0 pt-4 pr-4">
-                    <button type="button" data-action="click->modal#close" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                      <span class="sr-only">Закрыть</span>
-                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div class="p-6">
-                    <turbo-frame id="equipment-modal-frame">
-                    </turbo-frame>
-                  </div>
-                </div>
-              </div>
-            </div>'.html_safe
-          ),
-          turbo_stream.replace(
-            "equipment-modal-frame",
-            partial: "shared/equipment_form",
-            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
-          ),
-          turbo_stream.append("body", "<script>document.body.classList.add('overflow-hidden');</script>".html_safe)
-        ]
-      end
-    end
-  end:update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
+  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
   before_action :require_delete_permission, only: [:destroy]
 
   def index
@@ -83,38 +47,16 @@ class CuteEquipmentsController < ApplicationController
     @equipment = CuteEquipment.new
     @equipment.cute_installation_id = params[:cute_installation_id] if params[:cute_installation_id].present?
     @installations = CuteInstallation.ordered
+    @equipment_type = 'cute'
 
     respond_to do |format|
       format.html
       format.turbo_stream do
-        render turbo_stream: [
-          turbo_stream.replace("equipment-modal", 
-            '<div id="equipment-modal" class="fixed inset-0 z-50 overflow-y-auto bg-gray-500 bg-opacity-75" data-controller="modal" data-action="keydown@window->modal#escapeKey">
-              <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl max-w-2xl w-full">
-                  <div class="absolute top-0 right-0 pt-4 pr-4">
-                    <button type="button" data-action="click->modal#close" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                      <span class="sr-only">Закрыть</span>
-                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div class="p-6">
-                    <turbo-frame id="equipment-modal-frame">
-                    </turbo-frame>
-                  </div>
-                </div>
-              </div>
-            </div>'.html_safe
-          ),
-          turbo_stream.replace(
-            "equipment-modal-frame",
-            partial: "shared/equipment_form",
-            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
-          ),
-          turbo_stream.append("body", "<script>document.body.classList.add('overflow-hidden');</script>".html_safe)
-        ]
+        render turbo_stream: turbo_stream.replace(
+          "equipment-modal-frame",
+          partial: "shared/equipment_modal_form",
+          locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
+        )
       end
     end
   end
@@ -124,6 +66,7 @@ class CuteEquipmentsController < ApplicationController
     @equipment.user = current_user
     @equipment.last_changed_by = current_user
     @equipment.current_user_admin = current_user.admin?
+    @equipment_type = 'cute'
 
     if @equipment.save
       respond_to do |format|
@@ -131,17 +74,18 @@ class CuteEquipmentsController < ApplicationController
           redirect_to cute_equipments_path, notice: t("flash.created", resource: CuteEquipment.model_name.human)
         end
         format.turbo_stream do
-          render turbo_stream: [
+          updates = [
             turbo_stream.replace("equipment-modal-frame", ""),
-            turbo_stream.append("equipment-table-body",
-              partial: "shared/equipment_row",
-              locals: { equipment: @equipment, equipment_type: "cute" }
-            ),
             turbo_stream.replace("flash-messages",
               partial: "shared/flash_message",
               locals: { message: t("flash.created", resource: CuteEquipment.model_name.human), type: "success" }
             )
           ]
+          updates << turbo_stream.append("equipment-table-body",
+            partial: "shared/equipment_row",
+            locals: { equipment: @equipment, equipment_type: "cute" }
+          ) if turbo_request_from_modal?
+          render turbo_stream: updates
         end
       end
     else
@@ -153,8 +97,8 @@ class CuteEquipmentsController < ApplicationController
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
             "equipment-modal-frame",
-            partial: "shared/equipment_form",
-            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+            partial: "shared/equipment_modal_form",
+            locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
           ), status: :unprocessable_entity
         end
       end
@@ -163,18 +107,16 @@ class CuteEquipmentsController < ApplicationController
 
   def edit
     @installations = CuteInstallation.ordered
+    @equipment_type = 'cute'
 
     respond_to do |format|
       format.html
       format.turbo_stream do
-        render turbo_stream: [
-          turbo_stream.replace(
-            "equipment-modal-frame",
-            partial: "shared/equipment_form",
-            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
-          ),
-          turbo_stream.append("body", "<script>document.getElementById('equipment-modal').classList.remove('hidden'); document.body.classList.add('overflow-hidden');</script>".html_safe)
-        ]
+        render turbo_stream: turbo_stream.replace(
+          "equipment-modal-frame",
+          partial: "shared/equipment_modal_form",
+          locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
+        )
       end
     end
   end
@@ -182,6 +124,7 @@ class CuteEquipmentsController < ApplicationController
   def update
     @equipment.last_changed_by = current_user
     @equipment.current_user_admin = current_user.admin?
+    @equipment_type = 'cute'
 
     if @equipment.update(equipment_params)
       respond_to do |format|
@@ -193,17 +136,18 @@ class CuteEquipmentsController < ApplicationController
           end
         end
         format.turbo_stream do
-          render turbo_stream: [
+          updates = [
             turbo_stream.replace("equipment-modal-frame", ""),
-            turbo_stream.replace("equipment-row-#{@equipment.id}",
-              partial: "shared/equipment_row",
-              locals: { equipment: @equipment, equipment_type: "cute" }
-            ),
             turbo_stream.replace("flash-messages",
               partial: "shared/flash_message",
               locals: { message: t("flash.updated", resource: CuteEquipment.model_name.human), type: "success" }
             )
           ]
+          updates << turbo_stream.replace("equipment-row-#{@equipment.id}",
+            partial: "shared/equipment_row",
+            locals: { equipment: @equipment, equipment_type: "cute" }
+          ) if turbo_request_from_modal?
+          render turbo_stream: updates
         end
       end
     else
@@ -215,12 +159,17 @@ class CuteEquipmentsController < ApplicationController
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
             "equipment-modal-frame",
-            partial: "shared/equipment_form",
-            locals: { equipment: @equipment, equipment_type: "cute", installations: @installations }
+            partial: "shared/equipment_modal_form",
+            locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
           ), status: :unprocessable_entity
         end
       end
     end
+  end
+
+  def destroy
+    @equipment.destroy
+    redirect_to cute_equipments_path, notice: t("flash.deleted", resource: CuteEquipment.model_name.human)
   end
 
   def destroy
@@ -317,5 +266,9 @@ class CuteEquipmentsController < ApplicationController
       :name, :equipment_type, :equipment_model, :serial_number,
       :inventory_number, :status, :note, :cute_installation_id
     )
+  end
+
+  def turbo_request_from_modal?
+    request.headers['Turbo-Frame'] == 'equipment-modal-frame'
   end
 end
