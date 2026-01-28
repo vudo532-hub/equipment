@@ -1,6 +1,6 @@
 class FidsEquipmentsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :assign_to_installation, :unassign_from_installation, :audit_history]
+  before_action :set_equipment, only: [:show, :edit, :update, :destroy, :audit_history]
   before_action :require_delete_permission, only: [:destroy]
 
   def index
