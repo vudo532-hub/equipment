@@ -1,45 +1,61 @@
 <!-- Equipment Modal -->
-<!-- This modal is shared across all equipment systems: CUTE, FIDS, ZAMAR -->
-<div id="equipment-modal"
-     class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-500 bg-opacity-75 transition-opacity duration-300 opacity-0"
-     data-controller="modal"
-     data-action="keydown@window->modal#escapeKey click->modal#closeOnBackdropClick">
-
-  <!-- Modal Content -->
-  <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-    <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all duration-300 max-w-2xl w-full">
-
-      <!-- Close button -->
-      <div class="absolute top-0 right-0 pt-4 pr-4">
-        <button type="button"
-                data-action="click->modal#close"
-                class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                aria-label="Закрыть окно">
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Modal body will be loaded here via Turbo Frame -->
-      <div class="p-6">
-        <turbo-frame id="equipment-modal-frame"
-                     class="block"
-                     data-turbo-action="replace">
-          <!-- Content will be loaded here by Turbo Stream -->
-        </turbo-frame>
-      </div>
-
-      <!-- Loading state (optional) -->
-      <div id="modal-loading" class="hidden p-6 text-center">
-        <div class="inline-block animate-spin">
-          <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-        <p class="mt-2 text-gray-600">Загрузка...</p>
-      </div>
+<!-- Простое модальное окно для добавления/редактирования оборудования -->
+<div id="equipment-modal" 
+     class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+     data-controller="modal">
+  <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+    <!-- Закрывающая кнопка -->
+    <div class="absolute top-0 right-0 pt-4 pr-4">
+      <button type="button" onclick="closeEquipmentModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
+
+    <!-- Контент модального окна -->
+    <turbo-frame id="equipment-modal-frame" class="block">
+      <!-- Контент будет загружен сюда -->
+    </turbo-frame>
   </div>
 </div>
+
+<script>
+  function openEquipmentModal() {
+    document.getElementById('equipment-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEquipmentModal() {
+    document.getElementById('equipment-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    const frame = document.querySelector('turbo-frame#equipment-modal-frame');
+    if (frame) {
+      frame.innerHTML = '';
+    }
+  }
+
+  // Слушаем успешное сохранение (Turbo Stream заменит пустое содержимое)
+  document.querySelector('turbo-frame#equipment-modal-frame').addEventListener('turbo:load', function(e) {
+    // Если контент пустой - закрываем модальное окно
+    if (!e.target.innerHTML.trim()) {
+      setTimeout(() => {
+        closeEquipmentModal();
+      }, 100);
+    }
+  });
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeEquipmentModal();
+    }
+  });
+
+  // Закрытие по клику вне модального окна
+  document.getElementById('equipment-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeEquipmentModal();
+    }
+  });
+</script>
