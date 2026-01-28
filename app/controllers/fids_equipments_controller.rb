@@ -93,7 +93,6 @@ class FidsEquipmentsController < ApplicationController
 
   def update
     @equipment.last_changed_by = current_user
-    @equipment.current_user_admin = current_user.admin?
     @equipment_type = 'fids'
 
     if @equipment.update(equipment_params)
