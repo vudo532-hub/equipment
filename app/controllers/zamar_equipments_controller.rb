@@ -140,9 +140,6 @@ class ZamarEquipmentsController < ApplicationController
     @equipment.destroy
     redirect_to zamar_equipments_path, notice: t("flash.deleted", resource: ZamarEquipment.model_name.human)
   end
-    @equipment.destroy
-    redirect_to zamar_equipments_path, notice: t("flash.deleted", resource: ZamarEquipment.model_name.human)
-  end
 
   # AJAX endpoint для истории изменений
   def audit_history
@@ -169,6 +166,7 @@ class ZamarEquipmentsController < ApplicationController
       has_more: has_more,
       page: page
     }
+  end
 
   private
 
