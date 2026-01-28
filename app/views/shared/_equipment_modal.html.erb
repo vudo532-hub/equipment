@@ -37,12 +37,16 @@
 
   // Слушаем успешное сохранение через Turbo Stream
   document.addEventListener('turbo:submit-end', function(e) {
-    // Если форма в модальном окне успешно отправлена, закрываем модальное окно
+    // Если форма в модальном окне успешно отправлена, закрываем модальное окно и обновляем страницу
     const modal = document.getElementById('equipment-modal');
     const isModalVisible = !modal.classList.contains('hidden');
     if (isModalVisible && e.detail && e.detail.success) {
       setTimeout(() => {
         closeEquipmentModal();
+        // Обновляем страницу после закрытия модального окна
+        setTimeout(() => {
+          location.reload();
+        }, 200);
       }, 100);
     }
   });
