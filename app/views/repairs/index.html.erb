@@ -286,7 +286,7 @@
         });
         
         alert(data.message);
-        window.location.href = `/repairs/${data.batch_id}`;
+        window.location.href = `/repairs/acts/${data.batch_id}`;
       } else {
         alert(data.error || 'Ошибка при создании акта');
         document.getElementById('confirmBtn').disabled = false;

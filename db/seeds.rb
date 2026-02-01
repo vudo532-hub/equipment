@@ -37,7 +37,7 @@ user.save!
 puts "Пользователь: #{user.email} (#{user.full_name})"
 
 # Типы мест установки CUTE
-cute_installation_types = ["Стойка регистрации", "Гейт", "Киоск самообслуживания", "Бизнес-зал"]
+cute_installation_types = ["Стойка регистрации", "Выход на посадку", "Транзит", "Негабарит", "VIP", "Комплектовка", "Камера хранения", "Учебный класс", "Склад", "ЦУИТ", "Комната", "Киоск самообслуживания"]
 
 # Типы мест установки FIDS
 fids_installation_types = ["Табло вылета", "Табло прилёта", "Информационный монитор", "Гейт-дисплей"]
@@ -51,13 +51,13 @@ fids_equipment_types = [:led_panel, :lcd_monitor, :media_player, :controller, :n
 # Создание мест установки CUTE
 puts "Создание мест установки CUTE..."
 cute_installations = []
-10.times do |i|
+cute_installation_types.each_with_index do |type, i|
   installation = CuteInstallation.find_or_create_by!(
     user: user,
     identifier: "CUTE-#{format('%03d', i + 1)}"
   ) do |inst|
-    inst.name = "#{cute_installation_types.sample} #{i + 1}"
-    inst.installation_type = cute_installation_types.sample
+    inst.name = "#{type} #{i + 1}"
+    inst.installation_type = type
   end
   cute_installations << installation
 end

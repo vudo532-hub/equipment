@@ -46,7 +46,6 @@ class CuteEquipmentsController < ApplicationController
   def new
     @equipment = CuteEquipment.new
     @equipment.cute_installation_id = params[:cute_installation_id] if params[:cute_installation_id].present?
-    @installations = CuteInstallation.ordered
     @equipment_type = 'cute'
 
     respond_to do |format|
@@ -55,7 +54,7 @@ class CuteEquipmentsController < ApplicationController
         render turbo_stream: turbo_stream.replace(
           "equipment-modal-frame",
           partial: "shared/equipment_modal_form",
-          locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
+          locals: { equipment: @equipment, equipment_type: @equipment_type }
         )
       end
     end
@@ -89,7 +88,6 @@ class CuteEquipmentsController < ApplicationController
         end
       end
     else
-      @installations = CuteInstallation.ordered
       respond_to do |format|
         format.html do
           render :new, status: :unprocessable_entity
@@ -98,7 +96,7 @@ class CuteEquipmentsController < ApplicationController
           render turbo_stream: turbo_stream.replace(
             "equipment-modal-frame",
             partial: "shared/equipment_modal_form",
-            locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
+            locals: { equipment: @equipment, equipment_type: @equipment_type }
           ), status: :unprocessable_entity
         end
       end
@@ -106,7 +104,6 @@ class CuteEquipmentsController < ApplicationController
   end
 
   def edit
-    @installations = CuteInstallation.ordered
     @equipment_type = 'cute'
 
     respond_to do |format|
@@ -115,7 +112,7 @@ class CuteEquipmentsController < ApplicationController
         render turbo_stream: turbo_stream.replace(
           "equipment-modal-frame",
           partial: "shared/equipment_modal_form",
-          locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
+          locals: { equipment: @equipment, equipment_type: @equipment_type }
         )
       end
     end
@@ -151,7 +148,6 @@ class CuteEquipmentsController < ApplicationController
         end
       end
     else
-      @installations = CuteInstallation.ordered
       respond_to do |format|
         format.html do
           render :edit, status: :unprocessable_entity
@@ -160,7 +156,7 @@ class CuteEquipmentsController < ApplicationController
           render turbo_stream: turbo_stream.replace(
             "equipment-modal-frame",
             partial: "shared/equipment_modal_form",
-            locals: { equipment: @equipment, equipment_type: @equipment_type, installations: @installations }
+            locals: { equipment: @equipment, equipment_type: @equipment_type }
           ), status: :unprocessable_entity
         end
       end

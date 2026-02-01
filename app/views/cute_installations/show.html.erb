@@ -106,12 +106,6 @@
             </svg>
             Привязать
           </button>
-          <%= link_to new_cute_equipment_path(cute_installation_id: @installation.id), class: "inline-flex items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
-            <svg class="w-4 h-4 mr-1" style="margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Добавить новое
-          <% end %>
         </div>
       </div>
       
@@ -145,7 +139,7 @@
                   <td class="px-4 py-2 text-right">
                     <button type="button" 
                             onclick="unassignEquipment(<%= equipment.id %>)"
-                            class="text-xs text-red-600 hover:text-red-900">
+                            class="text-sm cursor-pointer text-red-600 hover:text-red-900">
                       Отвязать
                     </button>
                   </td>
@@ -247,7 +241,7 @@
         </div>
       </div>
       
-      <div class="flex justify-end space-x-3 gap-3">
+      <div class="flex justify-end space-x-3">
         <button type="button" onclick="closeAssignEquipmentModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
           Отмена
         </button>

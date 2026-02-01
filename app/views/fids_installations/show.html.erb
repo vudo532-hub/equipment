@@ -81,7 +81,15 @@
   <div class="bg-white shadow rounded-lg">
     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
       <h2 class="text-lg font-medium text-gray-900">Оборудование</h2>
-      <%# TODO: Add link when equipment CRUD is ready %>
+      <button type="button" 
+              onclick="openAssignEquipmentModal()"
+              style="cursor:pointer"
+              class="inline-flex items-center px-4 py-3 border border-blue-600 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">
+        <svg class="w-4 h-4 mr-1" style="margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+        </svg>
+        Привязать
+      </button>
     </div>
     <div class="p-6">
       <% if @installation.fids_equipments.any? %>
@@ -92,9 +100,16 @@
                 <p class="text-sm font-medium text-gray-900"><%= equipment.equipment_type %> — <%= equipment.equipment_model %></p>
                 <p class="text-sm text-gray-500"><%= equipment.serial_number %></p>
               </div>
-              <span class="px-2 py-1 text-xs rounded-full <%= equipment.status_color %>">
-                <%= equipment.status_text %>
-              </span>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 text-xs rounded-full <%= equipment.status_color %>">
+                  <%= equipment.status_text %>
+                </span>
+                <button type="button" 
+                        onclick="unassignEquipment(<%= equipment.id %>)"
+                        class="text-sm cursor-pointer text-red-600 hover:text-red-900">
+                  Отвязать
+                </button>
+              </div>
             </li>
           <% end %>
         </ul>
@@ -104,3 +119,235 @@
     </div>
   </div>
 </div>
+
+<!-- Modal для привязки оборудования по серийному номеру -->
+<div id="assignEquipmentModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Привязать оборудование к "<%= @installation.name %>"</h3>
+        <button type="button" onclick="closeAssignEquipmentModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Поле ввода серийного номера -->
+      <div class="mb-4">
+        <label for="serialNumberInput" class="block text-sm font-medium text-gray-700 mb-1">Серийный номер оборудования</label>
+        <div class="relative">
+          <input type="text" 
+                 id="serialNumberInput" 
+                 placeholder="Введите серийный номер..."
+                 autocomplete="off"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <div id="searchSpinner" class="hidden absolute right-3 top-2.5">
+            <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Preview найденного оборудования -->
+      <div id="equipmentPreview" class="hidden mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Найдено оборудование:</h4>
+        <dl class="space-y-1 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Тип:</dt>
+            <dd class="text-gray-900 font-medium" id="previewType"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Модель:</dt>
+            <dd class="text-gray-900" id="previewModel"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Серийный номер:</dt>
+            <dd class="text-gray-900" id="previewSerial"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Инв. номер:</dt>
+            <dd class="text-gray-900" id="previewInventory"></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">Статус:</dt>
+            <dd id="previewStatus"></dd>
+          </div>
+        </dl>
+        <input type="hidden" id="foundEquipmentId" value="">
+      </div>
+      
+      <!-- Сообщение об ошибке -->
+      <div id="searchError" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+        <div class="flex">
+          <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <p class="ml-3 text-sm text-red-700" id="searchErrorText"></p>
+        </div>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <button type="button" onclick="closeAssignEquipmentModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+          Отмена
+        </button>
+        <button type="button" onclick="attachEquipment()" id="attachButton" disabled 
+                class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer">
+          Привязать
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const installationId = <%= @installation.id %>;
+  
+  function openAssignEquipmentModal() {
+    document.getElementById('assignEquipmentModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('serialNumberInput').focus();
+  }
+  
+  function closeAssignEquipmentModal() {
+    document.getElementById('assignEquipmentModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    // Очистка формы
+    document.getElementById('serialNumberInput').value = '';
+    document.getElementById('equipmentPreview').classList.add('hidden');
+    document.getElementById('searchError').classList.add('hidden');
+    document.getElementById('attachButton').disabled = true;
+  }
+  
+  // Поиск оборудования по серийному номеру
+  document.getElementById('serialNumberInput').addEventListener('input', function(e) {
+    const serialNumber = e.target.value.trim();
+    
+    if (serialNumber.length < 3) {
+      document.getElementById('equipmentPreview').classList.add('hidden');
+      document.getElementById('searchError').classList.add('hidden');
+      document.getElementById('attachButton').disabled = true;
+      return;
+    }
+    
+    document.getElementById('searchSpinner').classList.remove('hidden');
+    
+    fetch(`/fids_installations/${installationId}/search_equipment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ serial_number: serialNumber })
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('searchSpinner').classList.add('hidden');
+      
+      if (data.success) {
+        // Показать найденное оборудование
+        document.getElementById('previewType').textContent = data.equipment.equipment_type_human;
+        document.getElementById('previewModel').textContent = data.equipment.equipment_model || '—';
+        document.getElementById('previewSerial').textContent = data.equipment.serial_number;
+        document.getElementById('previewInventory').textContent = data.equipment.inventory_number;
+        document.getElementById('previewStatus').innerHTML = `<span class="px-2 py-1 text-xs rounded-full ${data.equipment.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${data.equipment.status_human}</span>`;
+        document.getElementById('foundEquipmentId').value = data.equipment.id;
+        
+        document.getElementById('equipmentPreview').classList.remove('hidden');
+        document.getElementById('searchError').classList.add('hidden');
+        document.getElementById('attachButton').disabled = false;
+      } else {
+        document.getElementById('equipmentPreview').classList.add('hidden');
+        document.getElementById('searchErrorText').textContent = data.error;
+        document.getElementById('searchError').classList.remove('hidden');
+        document.getElementById('attachButton').disabled = true;
+      }
+    })
+    .catch(error => {
+      document.getElementById('searchSpinner').classList.add('hidden');
+      console.error('Error:', error);
+      document.getElementById('searchErrorText').textContent = 'Ошибка при поиске оборудования';
+      document.getElementById('searchError').classList.remove('hidden');
+      document.getElementById('attachButton').disabled = true;
+    });
+  });
+  
+  function attachEquipment() {
+    const equipmentId = document.getElementById('foundEquipmentId').value;
+    
+    if (!equipmentId) {
+      alert('Сначала найдите оборудование');
+      return;
+    }
+    
+    document.getElementById('attachButton').disabled = true;
+    document.getElementById('attachButton').textContent = 'Привязка...';
+    
+    fetch(`/fids_installations/${installationId}/attach_equipment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ equipment_id: equipmentId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Ошибка при привязке');
+        document.getElementById('attachButton').disabled = false;
+        document.getElementById('attachButton').textContent = 'Привязать';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Ошибка при привязке оборудования');
+      document.getElementById('attachButton').disabled = false;
+      document.getElementById('attachButton').textContent = 'Привязать';
+    });
+  }
+  
+  function unassignEquipment(equipmentId) {
+    if (!confirm('Вы уверены, что хотите отвязать это оборудование?')) {
+      return;
+    }
+    
+    fetch(`/fids_installations/${installationId}/detach_equipment?equipment_id=${equipmentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Ошибка при отвязке');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Ошибка при отвязке оборудования');
+    });
+  }
+  
+  // Закрытие по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeAssignEquipmentModal();
+    }
+  });
+  
+  // Закрытие по клику вне модального окна
+  document.getElementById('assignEquipmentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAssignEquipmentModal();
+    }
+  });
+</script>

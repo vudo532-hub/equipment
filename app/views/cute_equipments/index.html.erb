@@ -81,8 +81,22 @@
         <div class="min-w-[200px]">
           <label class="block text-xs font-medium text-gray-500 mb-1">Тип места установки</label>
           <%= f.select :cute_installation_installation_type_eq,
-              options_for_select(@installation_types.map { |t| [t, t] }, @q.cute_installation_installation_type_eq),
-              { include_blank: "Все типы мест" },
+              options_for_select([
+                ["Все типы", ""],
+                ["Стойка регистрации", "Стойка регистрации"],
+                ["Выход на посадку", "Выход на посадку"],
+                ["Транзит", "Транзит"],
+                ["Негабарит", "Негабарит"],
+                ["VIP", "VIP"],
+                ["Комплектовка", "Комплектовка"],
+                ["Камера хранения", "Камера хранения"],
+                ["Учебный класс", "Учебный класс"],
+                ["Склад", "Склад"],
+                ["ЦУИТ", "ЦУИТ"],
+                ["Комната", "Комната"],
+                ["Киоск самообслуживания", "Киоск самообслуживания"]
+              ], @q.cute_installation_installation_type_eq),
+              {},
               class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
         </div>
       </div>
@@ -177,13 +191,25 @@
                   </svg>
                 </a>
                 <% if can_delete? %>
-                  <%= link_to "Удалить", cute_equipment_path(equipment), 
+                  <%= link_to cute_equipment_path(equipment),
                       data: { turbo_method: :delete, turbo_confirm: "Вы уверены, что хотите удалить это оборудование?" },
-                      class: "text-red-600 hover:text-red-900" %>
+                      class: "text-red-600 hover:text-red-900",
+                      title: "Удалить",
+                      aria: { label: 'Удалить' } do %>
+                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M6 18L18 6" />
+                    </svg>
+                  <% end %>
                 <% else %>
-                  <%= link_to "Удалить", "#", 
+                  <%= link_to "#",
                       onclick: "alert('Удаление недоступно для вашей роли'); return false;",
-                      class: "text-gray-400 cursor-not-allowed" %>
+                      class: "text-gray-400 cursor-not-allowed",
+                      title: "Удаление недоступно",
+                      aria: { label: 'Удаление недоступно' } do %>
+                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M6 18L18 6" />
+                    </svg>
+                  <% end %>
                 <% end %>
               </td>
             </tr>

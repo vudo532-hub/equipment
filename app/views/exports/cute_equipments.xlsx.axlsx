@@ -33,14 +33,14 @@ wb.add_worksheet(name: "Оборудование CUTE") do |sheet|
   @equipments.each_with_index do |equipment, index|
     sheet.add_row [
       index + 1,
-      equipment.name,
+      equipment.equipment_type_text,
       equipment.equipment_type,
       equipment.equipment_model,
       equipment.serial_number,
       equipment.inventory_number,
       equipment.status_text,
       equipment.cute_installation&.name,
-      equipment.notes,
+      equipment.note,
       equipment.created_at,
       equipment.updated_at
     ], style: [nil, nil, nil, nil, nil, nil, nil, nil, nil, date_style, date_style]

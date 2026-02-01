@@ -69,31 +69,20 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2" style="gap: 16px;">
-      <div>
-        <%= f.label :status, class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= f.select :status, 
-            options_for_select([
-              ["В работе", "active"],
-              ["В ремонт", "maintenance"],
-              ["Ожидается из ремонта", "waiting_repair"],
-              ["Готово к выдачи", "ready_to_dispatch"],
-              ["Списание", "decommissioned"],
-              ["Передано в другое место", "transferred"],
-              ["С примечанием", "with_note"]
-            ], equipment.status || "active"),
-            {},
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-      </div>
-
-      <div>
-        <%= f.label :cute_installation_id, "Место установки", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= f.select :cute_installation_id,
-            options_for_select(@installations.map { |i| [i.name, i.id] }, equipment.cute_installation_id),
-            { include_blank: "Не указано" },
-            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500",
-            id: "cute_equipment_cute_installation_id" %>
-      </div>
+    <div>
+      <%= f.label :status, class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.select :status, 
+          options_for_select([
+            ["В работе", "active"],
+            ["В ремонт", "maintenance"],
+            ["Ожидается из ремонта", "waiting_repair"],
+            ["Готово к выдачи", "ready_to_dispatch"],
+            ["Списание", "decommissioned"],
+            ["Передано в другое место", "transferred"],
+            ["С примечанием", "with_note"]
+          ], equipment.status || "active"),
+          {},
+          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
     </div>
 
     <!-- Предупреждение о дубликате -->
