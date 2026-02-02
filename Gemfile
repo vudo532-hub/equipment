@@ -30,7 +30,7 @@ gem "pundit"
 gem "ransack"
 
 # === Pagination ===
-gem "pagy"
+gem "pagy", "~> 6.5"
 
 # === Export (CSV, Excel) ===
 gem "csv"
