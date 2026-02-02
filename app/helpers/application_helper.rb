@@ -1,4 +1,6 @@
 module ApplicationHelper
+  include Pagy::Frontend
+  
   # Truncate note with tooltip
   def truncate_note(note, max_length: 50)
     return "—" if note.blank?

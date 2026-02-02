@@ -5,5 +5,5 @@
 
 require 'pagy'
 
-# Pagy 43.x uses frozen DEFAULT, pagination limit is set at runtime via pagy method call
-# Default limit is 20, which is suitable for our use case
+# В pagy 43.x настройки задаются при вызове pagy(), а не через DEFAULT
+# Пример: pagy(@collection, limit: 25)
