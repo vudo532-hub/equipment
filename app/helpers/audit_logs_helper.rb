@@ -132,7 +132,7 @@ module AuditLogsHelper
     end
   end
 
-  def format_audit_changes(audit)
+  def format_audit_changes(audit, model_class = nil)
     return content_tag(:span, "—", class: "text-gray-400") if audit.audited_changes.blank?
 
     changes_html = []
