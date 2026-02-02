@@ -11,10 +11,30 @@ class FidsInstallationsController < ApplicationController
 
   def show
     @equipments = @installation.fids_equipments.ordered.limit(10)
+    
+    # История оборудования (привязка/отвязка) для этого места установки
+    @equipment_history = Audit.where(auditable_type: "FidsEquipment")
+                              .where("audited_changes::text LIKE ?", "%fids_installation_id%")
+                              .order(created_at: :desc)
+                              .limit(100)
+                              .select { |audit| 
+                                changes = audit.read_attribute(:audited_changes)
+                                if changes.is_a?(Hash) && changes["fids_installation_id"].is_a?(Array)
+                                  old_val, new_val = changes["fids_installation_id"]
+                                  old_val == @installation.id || new_val == @installation.id
+                                else
+                                  false
+                                end
+                              }
+                              .first(20)
   end
 
   def new
     @installation = FidsInstallation.new
+    
+    if turbo_frame_request?
+      render partial: "modal_form", locals: { installation: @installation }
+    end
   end
 
   def create
@@ -22,20 +42,39 @@ class FidsInstallationsController < ApplicationController
     @installation.user = current_user
 
     if @installation.save
-      redirect_to fids_installations_path, notice: t("flash.created", resource: FidsInstallation.model_name.human)
+      if turbo_frame_request?
+        redirect_to fids_installations_path, notice: t("flash.created", resource: FidsInstallation.model_name.human)
+      else
+        redirect_to fids_installations_path, notice: t("flash.created", resource: FidsInstallation.model_name.human)
+      end
     else
-      render :new, status: :unprocessable_entity
+      if turbo_frame_request?
+        render partial: "modal_form", locals: { installation: @installation }, status: :unprocessable_entity
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 
   def edit
+    if turbo_frame_request?
+      render partial: "modal_form", locals: { installation: @installation }
+    end
   end
 
   def update
     if @installation.update(installation_params)
-      redirect_to fids_installations_path, notice: t("flash.updated", resource: FidsInstallation.model_name.human)
+      if turbo_frame_request?
+        redirect_to fids_installations_path, notice: t("flash.updated", resource: FidsInstallation.model_name.human)
+      else
+        redirect_to fids_installations_path, notice: t("flash.updated", resource: FidsInstallation.model_name.human)
+      end
     else
-      render :edit, status: :unprocessable_entity
+      if turbo_frame_request?
+        render partial: "modal_form", locals: { installation: @installation }, status: :unprocessable_entity
+      else
+        render :edit, status: :unprocessable_entity
+      end
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_02_182601) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,10 +62,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
     t.datetime "updated_at", null: false
     t.bigint "last_changed_by_id"
     t.string "repair_ticket_number"
+    t.bigint "equipment_type_ref_id"
     t.index ["cute_installation_id"], name: "index_cute_equipments_on_cute_installation_id"
     t.index ["equipment_model"], name: "index_cute_equipments_on_equipment_model"
     t.index ["equipment_type", "cute_installation_id"], name: "idx_on_equipment_type_cute_installation_id_620304c018"
     t.index ["equipment_type"], name: "index_cute_equipments_on_equipment_type"
+    t.index ["equipment_type_ref_id"], name: "index_cute_equipments_on_equipment_type_ref_id"
     t.index ["inventory_number"], name: "index_cute_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_cute_equipments_on_last_action_date"
     t.index ["last_changed_by_id"], name: "index_cute_equipments_on_last_changed_by_id"
@@ -83,11 +85,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "terminal"
+    t.bigint "installation_type_ref_id"
     t.index ["installation_type"], name: "index_cute_installations_on_installation_type"
+    t.index ["installation_type_ref_id"], name: "index_cute_installations_on_installation_type_ref_id"
     t.index ["name"], name: "index_cute_installations_on_name"
     t.index ["terminal"], name: "index_cute_installations_on_terminal"
     t.index ["user_id", "identifier"], name: "index_cute_installations_on_user_id_and_identifier", unique: true, where: "(identifier IS NOT NULL)"
     t.index ["user_id"], name: "index_cute_installations_on_user_id"
+  end
+
+  create_table "equipment_types", force: :cascade do |t|
+    t.string "system", null: false
+    t.string "name", null: false
+    t.string "code", null: false
+    t.integer "position", default: 0
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["system", "active"], name: "index_equipment_types_on_system_and_active"
+    t.index ["system", "code"], name: "index_equipment_types_on_system_and_code", unique: true
+    t.index ["system", "name"], name: "index_equipment_types_on_system_and_name", unique: true
   end
 
   create_table "fids_equipments", force: :cascade do |t|
@@ -104,9 +121,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
     t.datetime "updated_at", null: false
     t.bigint "last_changed_by_id"
     t.string "repair_ticket_number"
+    t.bigint "equipment_type_ref_id"
     t.index ["equipment_model"], name: "index_fids_equipments_on_equipment_model"
     t.index ["equipment_type", "fids_installation_id"], name: "idx_on_equipment_type_fids_installation_id_9345370e8c"
     t.index ["equipment_type"], name: "index_fids_equipments_on_equipment_type"
+    t.index ["equipment_type_ref_id"], name: "index_fids_equipments_on_equipment_type_ref_id"
     t.index ["fids_installation_id"], name: "index_fids_equipments_on_fids_installation_id"
     t.index ["inventory_number"], name: "index_fids_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_fids_equipments_on_last_action_date"
@@ -125,11 +144,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "terminal"
+    t.bigint "installation_type_ref_id"
     t.index ["installation_type"], name: "index_fids_installations_on_installation_type"
+    t.index ["installation_type_ref_id"], name: "index_fids_installations_on_installation_type_ref_id"
     t.index ["name"], name: "index_fids_installations_on_name"
     t.index ["terminal"], name: "index_fids_installations_on_terminal"
     t.index ["user_id", "identifier"], name: "index_fids_installations_on_user_id_and_identifier", unique: true, where: "(identifier IS NOT NULL)"
     t.index ["user_id"], name: "index_fids_installations_on_user_id"
+  end
+
+  create_table "installation_types", force: :cascade do |t|
+    t.string "system", null: false
+    t.string "name", null: false
+    t.string "code", null: false
+    t.integer "position", default: 0
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["system", "active"], name: "index_installation_types_on_system_and_active"
+    t.index ["system", "code"], name: "index_installation_types_on_system_and_code", unique: true
+    t.index ["system", "name"], name: "index_installation_types_on_system_and_name", unique: true
   end
 
   create_table "repair_batch_items", force: :cascade do |t|
@@ -196,9 +230,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "repair_ticket_number"
+    t.bigint "equipment_type_ref_id"
     t.index ["equipment_model"], name: "index_zamar_equipments_on_equipment_model"
     t.index ["equipment_type", "zamar_installation_id"], name: "idx_on_equipment_type_zamar_installation_id_ecc9e009e3"
     t.index ["equipment_type"], name: "index_zamar_equipments_on_equipment_type"
+    t.index ["equipment_type_ref_id"], name: "index_zamar_equipments_on_equipment_type_ref_id"
     t.index ["inventory_number"], name: "index_zamar_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_zamar_equipments_on_last_action_date"
     t.index ["last_changed_by_id"], name: "index_zamar_equipments_on_last_changed_by_id"
@@ -217,7 +253,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
     t.integer "terminal"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "installation_type_ref_id"
     t.index ["installation_type"], name: "index_zamar_installations_on_installation_type"
+    t.index ["installation_type_ref_id"], name: "index_zamar_installations_on_installation_type_ref_id"
     t.index ["name"], name: "index_zamar_installations_on_name"
     t.index ["terminal"], name: "index_zamar_installations_on_terminal"
     t.index ["user_id", "identifier"], name: "index_zamar_installations_on_user_id_and_identifier", unique: true, where: "(identifier IS NOT NULL)"
@@ -226,17 +264,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_125411) do
 
   add_foreign_key "api_tokens", "users"
   add_foreign_key "cute_equipments", "cute_installations"
+  add_foreign_key "cute_equipments", "equipment_types", column: "equipment_type_ref_id"
   add_foreign_key "cute_equipments", "users"
   add_foreign_key "cute_equipments", "users", column: "last_changed_by_id"
+  add_foreign_key "cute_installations", "installation_types", column: "installation_type_ref_id"
   add_foreign_key "cute_installations", "users"
+  add_foreign_key "fids_equipments", "equipment_types", column: "equipment_type_ref_id"
   add_foreign_key "fids_equipments", "fids_installations"
   add_foreign_key "fids_equipments", "users"
   add_foreign_key "fids_equipments", "users", column: "last_changed_by_id"
+  add_foreign_key "fids_installations", "installation_types", column: "installation_type_ref_id"
   add_foreign_key "fids_installations", "users"
   add_foreign_key "repair_batch_items", "repair_batches"
   add_foreign_key "repair_batches", "users"
+  add_foreign_key "zamar_equipments", "equipment_types", column: "equipment_type_ref_id"
   add_foreign_key "zamar_equipments", "users"
   add_foreign_key "zamar_equipments", "users", column: "last_changed_by_id"
   add_foreign_key "zamar_equipments", "zamar_installations"
+  add_foreign_key "zamar_installations", "installation_types", column: "installation_type_ref_id"
   add_foreign_key "zamar_installations", "users"
 end

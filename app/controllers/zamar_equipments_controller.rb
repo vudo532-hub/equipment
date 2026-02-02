@@ -6,7 +6,13 @@ class ZamarEquipmentsController < ApplicationController
   def index
     @q = ZamarEquipment.ransack(params[:q])
     @q.sorts = "created_at desc" if @q.sorts.empty?
-    @equipments = @q.result(distinct: true).includes(:zamar_installation)
+    equipments = @q.result(distinct: true).includes(:zamar_installation, :equipment_type_ref)
+    
+    # Пагинация
+    @per_page = (params[:per_page] || 20).to_i
+    @per_page = 20 unless [20, 50, 100].include?(@per_page)
+    @pagy, @equipments = pagy(equipments, limit: @per_page)
+    
     @installations = ZamarInstallation.ordered
     @installation_types = ZamarInstallation.distinct.pluck(:installation_type).compact.sort
   end

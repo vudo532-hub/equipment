@@ -35,16 +35,10 @@
   <div>
     <%= form.label :installation_type, "Тип установки", class: "block text-sm font-medium text-gray-700" %>
     <%= form.select :installation_type, 
-        [
-          ["Гейт", "gate"],
-          ["Зал регистрации", "check_in"],
-          ["Зал прилёта", "arrival"],
-          ["Зал вылета", "departure"],
-          ["Общественная зона", "public_area"],
-          ["VIP зал", "vip_lounge"],
-          ["Багажная лента", "baggage_belt"],
-          ["Другое", "other"]
-        ],
+        options_for_select(
+          InstallationType.where(system: 'fids', active: true).order(:position).pluck(:name, :name),
+          installation.installation_type
+        ),
         { prompt: "Выберите тип" },
         class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" %>
   </div>

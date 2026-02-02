@@ -6,6 +6,7 @@ class ZamarInstallation < ApplicationRecord
 
   # Associations
   belongs_to :user, optional: true
+  belongs_to :installation_type_ref, class_name: "InstallationType", optional: true
   has_many :zamar_equipments, dependent: :nullify
 
   # Enums
@@ -45,6 +46,11 @@ class ZamarInstallation < ApplicationRecord
   def terminal_name
     return nil unless terminal
     terminal.to_s.split("_").last.upcase
+  end
+
+  # Название типа места установки из новой системы
+  def installation_type_name
+    installation_type_ref&.name || installation_type
   end
 
   # Ransack configuration

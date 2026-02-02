@@ -12,7 +12,10 @@
         </svg>
         Экспорт Excel
       <% end %>
-      <%= link_to new_cute_installation_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+      <%= link_to new_cute_installation_path, 
+          data: { turbo_frame: "installation-modal-frame" },
+          onclick: "openInstallationModal()",
+          class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
@@ -123,7 +126,10 @@
                 <%= installation.equipment_count %> шт.
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm font-medium" style="text-align: right;">
-                <%= link_to "Изменить", edit_cute_installation_path(installation), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                <%= link_to "Изменить", edit_cute_installation_path(installation), 
+                    data: { turbo_frame: "installation-modal-frame" },
+                    onclick: "openInstallationModal()",
+                    class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
                 <% if can_delete? %>
                   <%= link_to "Удалить", cute_installation_path(installation), 
                       data: { turbo_method: :delete, turbo_confirm: "Вы уверены, что хотите удалить это место установки?" },
@@ -158,3 +164,6 @@
     <% end %>
   </div>
 </div>
+
+<!-- Modal для добавления/редактирования места установки -->
+<%= render "shared/installation_modal" %>

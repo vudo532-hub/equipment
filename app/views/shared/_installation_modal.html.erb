@@ -1,0 +1,72 @@
+<!-- Installation Modal -->
+<!-- Простое модальное окно для добавления/редактирования мест установки -->
+<div id="installation-modal" 
+     class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+     data-controller="modal">
+  <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+    <!-- Закрывающая кнопка -->
+    <div class="absolute top-0 right-0 pt-4 p-4">
+      <button type="button" onclick="closeInstallationModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Контент модального окна -->
+    <turbo-frame id="installation-modal-frame" class="block">
+      <!-- Контент будет загружен сюда -->
+    </turbo-frame>
+  </div>
+</div>
+
+<script>
+  function openInstallationModal() {
+    const modal = document.getElementById('installation-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeInstallationModal() {
+    document.getElementById('installation-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    const frame = document.querySelector('turbo-frame#installation-modal-frame');
+    if (frame) {
+      frame.innerHTML = '';
+    }
+  }
+
+  // Слушаем успешное сохранение через Turbo Stream
+  document.addEventListener('turbo:submit-end', function(e) {
+    const modal = document.getElementById('installation-modal');
+    if (!modal) return;
+    const isModalVisible = !modal.classList.contains('hidden');
+    if (isModalVisible && e.detail && e.detail.success) {
+      setTimeout(() => {
+        closeInstallationModal();
+        setTimeout(() => {
+          location.reload();
+        }, 200);
+      }, 100);
+    }
+  });
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('installation-modal');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeInstallationModal();
+      }
+    }
+  });
+
+  // Закрытие по клику вне модального окна
+  document.getElementById('installation-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeInstallationModal();
+    }
+  });
+</script>

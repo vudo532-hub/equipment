@@ -6,6 +6,7 @@ class ZamarEquipment < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :zamar_installation, optional: true
   belongs_to :last_changed_by, class_name: "User", optional: true
+  belongs_to :equipment_type_ref, class_name: "EquipmentType", optional: true
 
   # Enums
   enum :equipment_type, {
@@ -58,8 +59,16 @@ class ZamarEquipment < ApplicationRecord
   end
 
   def equipment_type_text
+    # Сначала проверяем новую связь с EquipmentType
+    return equipment_type_ref.name if equipment_type_ref.present?
+    # Иначе используем старый enum
     return "—" if equipment_type.blank?
     I18n.t("zamar_equipment_types.#{equipment_type}", default: equipment_type.to_s.upcase)
+  end
+
+  # Название типа оборудования для новой системы
+  def equipment_type_name
+    equipment_type_ref&.name || equipment_type_text
   end
 
   def status_color

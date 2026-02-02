@@ -7,7 +7,7 @@ class CuteEquipmentsController < ApplicationController
     @q = CuteEquipment.ransack(params[:q])
     @q.sorts = "created_at desc" if @q.sorts.empty?
     
-    equipments = @q.result(distinct: true).includes(:cute_installation)
+    equipments = @q.result(distinct: true).includes(:cute_installation, :equipment_type_ref)
     
     # Filter by terminal if specified
     if params[:terminal].present?
@@ -20,14 +20,18 @@ class CuteEquipmentsController < ApplicationController
       equipments = equipments.unassigned
     end
     
-    @equipments = equipments
+    # Пагинация
+    @per_page = (params[:per_page] || 20).to_i
+    @per_page = 20 unless [20, 50, 100].include?(@per_page)
+    @pagy, @equipments = pagy(equipments, limit: @per_page)
+    
     @installations = CuteInstallation.ordered
     @installation_types = CuteInstallation.distinct.pluck(:installation_type).compact.sort
     
     respond_to do |format|
       format.html
       format.json do
-        render json: @equipments.map { |e|
+        render json: equipments.map { |e|
           {
             id: e.id,
             equipment_type: e.equipment_type,

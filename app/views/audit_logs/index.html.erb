@@ -5,6 +5,32 @@
     <p class="mt-1 text-sm text-gray-600">Журнал всех изменений оборудования и мест установки</p>
   </div>
 
+  <!-- Фильтры -->
+  <div class="bg-white shadow rounded-lg p-4 mb-6">
+    <%= form_with url: audit_logs_path, method: :get, local: true, class: "flex flex-wrap gap-4 items-end" do |f| %>
+      <div>
+        <%= f.label :system, "Система", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :system,
+            [["Все системы", ""], ["CUTE", "cute"], ["FIDS", "fids"], ["ZAMAR", "zamar"]],
+            { selected: params[:system] },
+            class: "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :action_type, "Действие", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :action_type,
+            [["Все действия", ""], ["Создание", "create"], ["Изменение", "update"], ["Удаление", "destroy"]],
+            { selected: params[:action_type] },
+            class: "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.submit "Применить", class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer" %>
+        <%= link_to "Сбросить", audit_logs_path, class: "px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 ml-2" %>
+      </div>
+    <% end %>
+  </div>
+
   <!-- Table -->
   <div class="bg-white shadow rounded-lg overflow-hidden">
     <% if @audits.any? %>
@@ -14,6 +40,7 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пользователь</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действие</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип объекта</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Объект</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Изменения</th>
           </tr>
@@ -22,16 +49,16 @@
           <% @audits.each do |audit| %>
             <tr class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= l audit.created_at, format: :long %>
+                <%= audit.created_at.strftime("%d.%m.%Y %H:%M") %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <% if audit.user.present? %>
                   <div class="flex items-center">
                     <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
-                      <%= audit.user.initials || '?' %>
+                      <%= audit.user.initials rescue '?' %>
                     </div>
                     <div class="ml-2">
-                      <div class="text-sm font-medium text-gray-900"><%= audit.user.full_name %></div>
+                      <div class="text-sm font-medium text-gray-900"><%= audit.user.full_name rescue audit.user.email %></div>
                       <div class="text-xs text-gray-500"><%= audit.user.email %></div>
                     </div>
                   </div>
@@ -40,58 +67,36 @@
                 <% end %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <% case audit.action %>
-                <% when "create" %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Создание
-                  </span>
-                <% when "update" %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    Изменение
-                  </span>
-                <% when "destroy" %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                    Удаление
-                  </span>
-                <% end %>
+                <%= action_badge(audit.action) %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= model_type_name(audit.auditable_type) %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <% model_name = case audit.auditable_type
-                   when "CuteEquipment" then "CUTE оборудование"
-                   when "FidsEquipment" then "FIDS оборудование"
-                   when "CuteInstallation" then "CUTE место установки"
-                   when "FidsInstallation" then "FIDS место установки"
-                   else audit.auditable_type
-                   end %>
-                <%= model_name %> #<%= audit.auditable_id %>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">
-                <% if audit.audited_changes.present? %>
-                  <% audit.audited_changes.each do |field, change| %>
-                    <% next if field == "updated_at" || field == "created_at" %>
-                    <div class="mb-1">
-                      <span class="font-medium"><%= field %>:</span>
-                      <% if change.is_a?(Array) %>
-                        <span class="text-red-600 line-through"><%= change[0].presence || "—" %></span>
-                        →
-                        <span class="text-green-600"><%= change[1].presence || "—" %></span>
-                      <% else %>
-                        <span class="text-green-600"><%= change.presence || "—" %></span>
-                      <% end %>
-                    </div>
-                  <% end %>
+                <% if audit.auditable %>
+                  <%= link_to auditable_display_name(audit),
+                      polymorphic_path(audit.auditable),
+                      class: "text-blue-600 hover:text-blue-800 hover:underline" %>
                 <% else %>
-                  <span class="text-gray-400">—</span>
+                  <span class="text-gray-400"><%= auditable_display_name(audit) %></span>
                 <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 max-w-md">
+                <%= format_audit_changes(audit) %>
               </td>
             </tr>
           <% end %>
         </tbody>
       </table>
-      
-      <!-- Pagination - to be added later -->
-      <div class="px-6 py-4 border-t border-gray-200">
-        <p class="text-sm text-gray-500">Показаны последние 100 записей</p>
+
+      <!-- Pagination -->
+      <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+          Показано <%= @pagy.from %>–<%= @pagy.to %> из <%= @pagy.count %> записей
+        </div>
+        <div>
+          <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+        </div>
       </div>
     <% else %>
       <div class="text-center py-12">

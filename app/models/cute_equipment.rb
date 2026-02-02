@@ -6,6 +6,7 @@ class CuteEquipment < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :cute_installation, optional: true
   belongs_to :last_changed_by, class_name: "User", optional: true
+  belongs_to :equipment_type_ref, class_name: "EquipmentType", optional: true
 
   # Virtual attribute for validation context
   attr_accessor :current_user_admin
@@ -67,8 +68,16 @@ class CuteEquipment < ApplicationRecord
   end
 
   def equipment_type_text
+    # Сначала проверяем новую связь с EquipmentType
+    return equipment_type_ref.name if equipment_type_ref.present?
+    # Иначе используем старый enum
     return "—" if equipment_type.blank?
     I18n.t("cute_equipment_types.#{equipment_type}", default: equipment_type.to_s.humanize)
+  end
+
+  # Название типа оборудования для новой системы
+  def equipment_type_name
+    equipment_type_ref&.name || equipment_type_text
   end
 
   # Алиас для API

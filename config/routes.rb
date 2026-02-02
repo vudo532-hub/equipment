@@ -100,6 +100,23 @@ Rails.application.routes.draw do
     # Admin routes
     namespace :admin do
       resources :users, only: [:index, :edit, :update]
+      
+      resources :equipment_types do
+        collection do
+          post :reorder
+        end
+      end
+      
+      resources :installation_types do
+        collection do
+          post :reorder
+        end
+      end
+
+      # Импорт оборудования
+      resource :import, only: [:new, :create] do
+        get :template, on: :collection
+      end
     end
   end
 

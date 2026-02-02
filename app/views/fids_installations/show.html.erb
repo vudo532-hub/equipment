@@ -118,6 +118,74 @@
       <% end %>
     </div>
   </div>
+
+  <!-- История установки оборудования -->
+  <div class="bg-white shadow rounded-lg mt-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">История установки оборудования</h2>
+    </div>
+    <div class="p-6">
+      <% if @equipment_history.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Оборудование</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Серийный №</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Действие</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Пользователь</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <% @equipment_history.each do |audit| %>
+                <% 
+                  raw_changes = audit.read_attribute(:audited_changes)
+                  installation_change = raw_changes["fids_installation_id"] if raw_changes.is_a?(Hash)
+                  old_val, new_val = installation_change if installation_change.is_a?(Array)
+                  is_attached = new_val == @installation.id
+                  equipment = audit.auditable
+                %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-2 text-sm text-gray-900">
+                    <%= audit.created_at.strftime("%d.%m.%Y %H:%M") %>
+                  </td>
+                  <td class="px-4 py-2 text-sm">
+                    <% if equipment %>
+                      <%= link_to fids_equipment_path(equipment), class: "text-blue-600 hover:text-blue-900" do %>
+                        <%= equipment.equipment_type_text %> — <%= equipment.equipment_model || "б/м" %>
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-400">Оборудование удалено</span>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-2 text-sm text-gray-500">
+                    <%= equipment&.serial_number || "—" %>
+                  </td>
+                  <td class="px-4 py-2">
+                    <% if is_attached %>
+                      <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Установлено
+                      </span>
+                    <% else %>
+                      <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Снято
+                      </span>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-2 text-sm text-gray-500">
+                    <%= audit.user&.full_name || "Система" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="text-sm text-gray-500 text-center py-4">История установки оборудования пуста</p>
+      <% end %>
+    </div>
+  </div>
 </div>
 
 <!-- Modal для привязки оборудования по серийному номеру -->

@@ -1,0 +1,49 @@
+<%= form_with model: [:admin, installation_type], local: true, class: "bg-white rounded-lg shadow p-6" do |form| %>
+  <% if installation_type.errors.any? %>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+      <h3 class="font-medium">Обнаружены ошибки:</h3>
+      <ul class="mt-2 list-disc list-inside">
+        <% installation_type.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="space-y-4">
+    <div>
+      <%= form.label :system, "Система", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.select :system, 
+          [['CUTE', 'cute'], ['FIDS', 'fids'], ['ZAMAR', 'zamar']],
+          {},
+          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :name, "Название", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.text_field :name, 
+          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+          placeholder: "Например: Стойка регистрации" %>
+    </div>
+
+    <div>
+      <%= form.label :code, "Код (опционально)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.text_field :code, 
+          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+          placeholder: "check_in_desk (генерируется автоматически)" %>
+      <p class="mt-1 text-sm text-gray-500">Если не указан, будет сгенерирован из названия</p>
+    </div>
+
+    <div class="flex items-center">
+      <%= form.check_box :active, class: "h-4 w-4 text-blue-600 border-gray-300 rounded" %>
+      <%= form.label :active, "Активен", class: "ml-2 text-sm font-medium text-gray-700" %>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+    <%= link_to "Отменить", admin_installation_types_path(system: installation_type.system || 'cute'),
+        class: "px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300" %>
+    <%= form.submit installation_type.persisted? ? "Сохранить" : "Добавить",
+        class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer" %>
+  </div>
+<% end %>
