@@ -23,7 +23,7 @@ class CuteEquipmentsController < ApplicationController
     # Пагинация
     @per_page = (params[:per_page] || 20).to_i
     @per_page = 20 unless [20, 50, 100].include?(@per_page)
-    @pagy, @equipments = pagy(equipments, limit: @per_page)
+    @pagy, @equipments = pagy(equipments, limit: @per_page, params: -> (params) { params.except(:authenticity_token) })
     
     @installations = CuteInstallation.ordered
     @installation_types = CuteInstallation.distinct.pluck(:installation_type).compact.sort

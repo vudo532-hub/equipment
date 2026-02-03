@@ -185,6 +185,32 @@
           <% end %>
         </tbody>
       </table>
+
+      <!-- Пагинация -->
+      <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <span class="text-sm text-gray-500">
+            Показано <%= @pagy.from %>–<%= @pagy.to %> из <%= @pagy.count %> записей
+          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500">Показать:</span>
+            <%= form_with url: fids_equipments_path, method: :get, local: true, class: "inline" do |f| %>
+              <% # Сохраняем текущие параметры фильтра %>
+              <% params[:q]&.each do |key, value| %>
+                <% if value.present? %>
+                  <%= hidden_field_tag "q[#{key}]", value %>
+                <% end %>
+              <% end %>
+              <%= f.select :per_page, [[20, 20], [50, 50], [100, 100]], 
+                  { selected: @per_page },
+                  { class: 'px-2 py-1 border border-gray-300 rounded text-sm', onchange: 'this.form.submit()' } %>
+            <% end %>
+          </div>
+        </div>
+        <div>
+          <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+        </div>
+      </div>
     <% else %>
       <div class="text-center py-12">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

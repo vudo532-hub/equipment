@@ -511,6 +511,7 @@ nav.pagy-nav {
 .pagy-nav .page,
 .pagination .page {
   display: inline-flex;
+  
 }
 
 /* Page links */
@@ -550,6 +551,8 @@ nav.pagy-nav {
   border-color: #2563eb;
   color: #ffffff;
   cursor: default;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
 }
 
 .pagy-nav .page.active a:hover,

@@ -207,6 +207,15 @@
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500">Показать:</span>
             <%= form_with url: cute_equipments_path, method: :get, local: true, class: "inline" do |f| %>
+              <% # Сохраняем текущие параметры фильтра %>
+              <% params[:q]&.each do |key, value| %>
+                <% if value.present? %>
+                  <%= hidden_field_tag "q[#{key}]", value %>
+                <% end %>
+              <% end %>
+              <% if params[:terminal].present? %>
+                <%= hidden_field_tag :terminal, params[:terminal] %>
+              <% end %>
               <%= f.select :per_page, [[20, 20], [50, 50], [100, 100]], 
                   { selected: @per_page },
                   { class: 'px-2 py-1 border border-gray-300 rounded text-sm', onchange: 'this.form.submit()' } %>
