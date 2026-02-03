@@ -208,6 +208,45 @@ module AuditLogsHelper
     end
   end
 
+  # Возвращает только название системы
+  def system_name(auditable_type)
+    case auditable_type
+    when /^Cute/ then "CUTE"
+    when /^Fids/ then "FIDS"
+    when /^Zamar/ then "ZAMAR"
+    when "RepairBatch", "RepairBatchItem" then "Ремонт"
+    when "Import" then "Импорт"
+    else
+      "—"
+    end
+  end
+
+  # Двухстрочное отображение объекта
+  def auditable_display_two_lines(audit)
+    return content_tag(:span, "Удалён", class: "text-gray-400") unless audit.auditable
+
+    case audit.auditable_type
+    when "CuteEquipment", "FidsEquipment", "ZamarEquipment"
+      model = audit.auditable.equipment_model.presence || "—"
+      serial = audit.auditable.serial_number.presence || "—"
+      safe_join([
+        content_tag(:div, model, class: "font-medium text-gray-900"),
+        content_tag(:div, serial, class: "text-xs text-gray-500")
+      ])
+    when "CuteInstallation", "FidsInstallation", "ZamarInstallation"
+      terminal = audit.auditable.terminal_name.presence || "—"
+      name = audit.auditable.name.presence || "—"
+      safe_join([
+        content_tag(:div, terminal, class: "font-medium text-gray-900"),
+        content_tag(:div, name, class: "text-xs text-gray-500")
+      ])
+    else
+      content_tag(:span, "#{audit.auditable_type} ##{audit.auditable_id}", class: "text-gray-500")
+    end
+  rescue StandardError
+    content_tag(:span, "#{audit.auditable_type} ##{audit.auditable_id}", class: "text-gray-400")
+  end
+
   def action_badge(action)
     case action
     when "create"

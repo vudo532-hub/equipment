@@ -37,51 +37,56 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пользователь</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действие</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип объекта</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Объект</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Изменения</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 120px;">Дата / Действие</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 180px;">Пользователь</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 70px;">Система</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 150px;">Объект</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Изменения</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <% @audits.each do |audit| %>
             <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= audit.created_at.strftime("%d.%m.%Y %H:%M") %>
+              <td class="px-4 py-3 whitespace-nowrap text-sm">
+                <div class="text-gray-900"><%= audit.created_at.strftime("%d.%m.%Y") %></div>
+                <div class="text-xs"><%= audit.created_at.strftime("%H:%M") %></div>
+                <div class="mt-1"><%= action_badge(audit.action) %></div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">
                 <% if audit.user.present? %>
                   <div class="flex items-center">
-                    <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
+                    <div class="h-7 w-7 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                       <%= audit.user.initials rescue '?' %>
                     </div>
-                    <div class="ml-2">
-                      <div class="text-sm font-medium text-gray-900"><%= audit.user.full_name rescue audit.user.email %></div>
-                      <div class="text-xs text-gray-500"><%= audit.user.email %></div>
+                    <div class="ml-2 min-w-0">
+                      <div class="text-sm font-medium text-gray-900 truncate"><%= audit.user.full_name rescue audit.user.email %></div>
                     </div>
                   </div>
                 <% else %>
-                  <span class="text-gray-400">Система</span>
+                  <span class="text-gray-400 text-sm">Система</span>
                 <% end %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <%= action_badge(audit.action) %>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded 
+                  <%= case system_name(audit.auditable_type)
+                      when 'CUTE' then 'bg-blue-100 text-blue-800'
+                      when 'FIDS' then 'bg-green-100 text-green-800'
+                      when 'ZAMAR' then 'bg-purple-100 text-purple-800'
+                      else 'bg-gray-100 text-gray-800'
+                      end %>">
+                  <%= system_name(audit.auditable_type) %>
+                </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= model_type_name(audit.auditable_type) %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-4 py-3 text-sm">
                 <% if audit.auditable %>
-                  <%= link_to auditable_display_name(audit),
-                      polymorphic_path(audit.auditable),
-                      class: "text-blue-600 hover:text-blue-800 hover:underline" %>
+                  <%= link_to polymorphic_path(audit.auditable), class: "hover:text-blue-600" do %>
+                    <%= auditable_display_two_lines(audit) %>
+                  <% end %>
                 <% else %>
-                  <span class="text-gray-400"><%= auditable_display_name(audit) %></span>
+                  <%= auditable_display_two_lines(audit) %>
                 <% end %>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-500 max-w-md">
+              <td class="px-4 py-3 text-sm text-gray-500">
                 <%= format_audit_changes(audit) %>
               </td>
             </tr>
