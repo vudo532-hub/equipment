@@ -47,14 +47,10 @@
         <div class="min-w-[180px]">
           <label class="block text-xs font-medium text-gray-500 mb-1">Тип</label>
           <%= f.select :installation_type_eq,
-              options_for_select([
-                ["Все типы", ""],
-                ["DSM", "DSM"],
-                ["DBA", "DBA"],
-                ["SBDO", "SBDO"],
-                ["Gates", "Gates"],
-                ["Другое", "Другое"]
-              ], @q.installation_type_eq),
+              options_for_select(
+                [["Все типы", ""]] + InstallationType.where(system: 'zamar', active: true).order(:position).pluck(:name, :name),
+                @q.installation_type_eq
+              ),
               {},
               class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500" %>
         </div>

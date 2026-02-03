@@ -47,17 +47,10 @@
         <div class="min-w-[180px]">
           <label class="block text-xs font-medium text-gray-500 mb-1">Тип</label>
           <%= f.select :installation_type_eq,
-              options_for_select([
-                ["Все типы", ""],
-                ["Гейт", "gate"],
-                ["Зал регистрации", "check_in"],
-                ["Зал прилёта", "arrival"],
-                ["Зал вылета", "departure"],
-                ["Общественная зона", "public_area"],
-                ["VIP зал", "vip_lounge"],
-                ["Багажная лента", "baggage_belt"],
-                ["Другое", "other"]
-              ], @q.installation_type_eq),
+              options_for_select(
+                [["Все типы", ""]] + InstallationType.where(system: 'fids', active: true).order(:position).pluck(:name, :name),
+                @q.installation_type_eq
+              ),
               {},
               class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500" %>
         </div>

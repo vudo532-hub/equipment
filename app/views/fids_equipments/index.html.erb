@@ -47,15 +47,10 @@
         <div class="min-w-[180px]">
           <label class="block text-xs font-medium text-gray-500 mb-1">Тип оборудования</label>
           <%= f.select :equipment_type_eq,
-              options_for_select([
-                ["Все типы", ""],
-                ["Монитор", "Монитор"],
-                ["LED панель", "LED панель"],
-                ["Информационный киоск", "Информационный киоск"],
-                ["Медиаплеер", "Медиаплеер"],
-                ["Видеостена", "Видеостена"],
-                ["Сервер", "Сервер"]
-              ], @q.equipment_type_eq),
+              options_for_select(
+                [["Все типы", ""]] + EquipmentType.where(system: 'fids', active: true).order(:position).pluck(:name, :code),
+                @q.equipment_type_eq
+              ),
               {},
               class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500" %>
         </div>
@@ -78,8 +73,11 @@
         <div class="min-w-[200px]">
           <label class="block text-xs font-medium text-gray-500 mb-1">Тип места установки</label>
           <%= f.select :fids_installation_installation_type_eq,
-              options_for_select(@installation_types.map { |t| [t, t] }, @q.fids_installation_installation_type_eq),
-              { include_blank: "Все типы мест" },
+              options_for_select(
+                [["Все типы мест", ""]] + InstallationType.where(system: 'fids', active: true).order(:position).pluck(:name, :name),
+                @q.fids_installation_installation_type_eq
+              ),
+              {},
               class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500" %>
         </div>
       </div>
