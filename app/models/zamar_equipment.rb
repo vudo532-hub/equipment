@@ -8,7 +8,7 @@ class ZamarEquipment < ApplicationRecord
   belongs_to :last_changed_by, class_name: "User", optional: true
   belongs_to :equipment_type_ref, class_name: "EquipmentType", optional: true
 
-  # Enums
+  # Enums - оставляем для обратной совместимости, но не валидируем
   enum :equipment_type, {
     dsm: 0,
     dba: 1,
@@ -27,8 +27,7 @@ class ZamarEquipment < ApplicationRecord
     with_note: 6
   }, default: :active
 
-  # Validations
-  validates :equipment_type, presence: true
+  # Validations - equipment_type больше не обязателен, используем equipment_type_ref_id
   validates :equipment_model, length: { maximum: 255 }
   validates :inventory_number, presence: true,
                                length: { maximum: 100 },
@@ -37,6 +36,9 @@ class ZamarEquipment < ApplicationRecord
                             length: { maximum: 100 },
                             uniqueness: { message: "уже существует" }
   validates :note, length: { maximum: 2000 }
+
+  # Callback для синхронизации equipment_type из формы
+  before_validation :sync_equipment_type_from_code
 
   # Scopes
   scope :ordered, -> { order(last_action_date: :desc, created_at: :desc) }
@@ -111,5 +113,24 @@ class ZamarEquipment < ApplicationRecord
 
   def update_last_action_date
     self.last_action_date = Time.current if changed?
+  end
+
+  # Синхронизация equipment_type из кода типа (из формы)
+  # Ищет EquipmentType по коду и привязывает equipment_type_ref_id
+  def sync_equipment_type_from_code
+    # Если equipment_type пришёл как строка (код), ищем соответствующий EquipmentType
+    if equipment_type.is_a?(String) && equipment_type.present?
+      eq_type = EquipmentType.find_by(system: 'zamar', code: equipment_type, active: true)
+      if eq_type
+        self.equipment_type_ref_id = eq_type.id
+        # Пытаемся установить enum, если код совпадает
+        if self.class.equipment_types.key?(equipment_type)
+          # Уже установлен корректно
+        else
+          # Код не входит в enum - ставим other
+          self.equipment_type = :other
+        end
+      end
+    end
   end
 end

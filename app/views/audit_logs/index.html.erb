@@ -37,8 +37,8 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 120px;">Дата / Действие</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 180px;">Пользователь</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 100px;">Дата</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 160px;">Пользователь</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 70px;">Система</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 150px;">Объект</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Изменения</th>
@@ -49,21 +49,15 @@
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3 whitespace-nowrap text-sm">
                 <div class="text-gray-900"><%= audit.created_at.strftime("%d.%m.%Y") %></div>
-                <div class="text-xs"><%= audit.created_at.strftime("%H:%M") %></div>
-                <div class="mt-1"><%= action_badge(audit.action) %></div>
+                <div class="text-xs text-gray-500"><%= audit.created_at.strftime("%H:%M") %></div>
               </td>
               <td class="px-4 py-3 whitespace-nowrap">
                 <% if audit.user.present? %>
-                  <div class="flex items-center">
-                    <div class="h-7 w-7 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
-                      <%= audit.user.initials rescue '?' %>
-                    </div>
-                    <div class="ml-2 min-w-0">
-                      <div class="text-sm font-medium text-gray-900 truncate"><%= audit.user.full_name rescue audit.user.email %></div>
-                    </div>
-                  </div>
+                  <div class="text-sm font-medium text-gray-900 truncate"><%= audit.user.full_name rescue audit.user.email %></div>
+                  <div class="mt-1"><%= action_badge(audit.action) %></div>
                 <% else %>
-                  <span class="text-gray-400 text-sm">Система</span>
+                  <div class="text-gray-400 text-sm">Система</div>
+                  <div class="mt-1"><%= action_badge(audit.action) %></div>
                 <% end %>
               </td>
               <td class="px-4 py-3 whitespace-nowrap">

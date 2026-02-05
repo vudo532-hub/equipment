@@ -43,6 +43,7 @@ class FidsEquipment < ApplicationRecord
 
   # Callbacks
   before_save :update_last_action_date
+  before_validation :sync_equipment_type_ref
   strip_attributes
   nilify_blanks
 
@@ -103,5 +104,13 @@ class FidsEquipment < ApplicationRecord
 
   def update_last_action_date
     self.last_action_date = Time.current if changed?
+  end
+
+  # Синхронизация equipment_type_ref_id из кода типа (из формы)
+  def sync_equipment_type_ref
+    if equipment_type.present? && equipment_type_ref_id.blank?
+      eq_type = EquipmentType.find_by(system: 'fids', code: equipment_type, active: true)
+      self.equipment_type_ref_id = eq_type.id if eq_type
+    end
   end
 end
