@@ -137,9 +137,18 @@ module AuditLogsHelper
 
     changes_html = []
 
-    audit.audited_changes.each do |field, change|
+    # Пропускаем старые поля если есть соответствующие ref_id поля
+    audited_changes = audit.audited_changes.dup
+    if audited_changes.key?("equipment_type") && audited_changes.key?("equipment_type_ref_id")
+      audited_changes.delete("equipment_type")
+    end
+    if audited_changes.key?("installation_type") && audited_changes.key?("installation_type_ref_id")
+      audited_changes.delete("installation_type")
+    end
+
+    audited_changes.each do |field, change|
       # Пропускаем технические поля
-      next if %w[updated_at created_at user_id].include?(field)
+      next if %w[updated_at created_at user_id last_changed_by_id last_action_date].include?(field)
 
       field_name = translate_field_name(field)
 

@@ -54,10 +54,10 @@
               <td class="px-4 py-3 whitespace-nowrap">
                 <% if audit.user.present? %>
                   <div class="text-sm font-medium text-gray-900 truncate"><%= audit.user.full_name rescue audit.user.email %></div>
-                  <div class="mt-1"><%= action_badge(audit.action) %></div>
+                  <div class="text-xs text-gray-500"><%= audit.action == "create" ? "Создание" : audit.action == "update" ? "Изменение" : audit.action == "destroy" ? "Удаление" : audit.action.humanize %></div>
                 <% else %>
                   <div class="text-gray-400 text-sm">Система</div>
-                  <div class="mt-1"><%= action_badge(audit.action) %></div>
+                  <div class="text-xs text-gray-500"><%= audit.action == "create" ? "Создание" : audit.action == "update" ? "Изменение" : audit.action == "destroy" ? "Удаление" : audit.action.humanize %></div>
                 <% end %>
               </td>
               <td class="px-4 py-3 whitespace-nowrap">
