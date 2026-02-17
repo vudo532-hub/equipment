@@ -103,4 +103,4 @@ gem "caxlsx", "~> 4.4"
 gem "caxlsx_rails", "~> 0.6.4"
 
 # Excel/CSV import
-gem "roo", "~> 2.10"
+gem "roo", "~> 3.0"
