@@ -6,7 +6,7 @@ class CuteInstallationsController < ApplicationController
   def index
     @q = CuteInstallation.ransack(params[:q])
     @q.sorts = "name asc" if @q.sorts.empty?
-    @installations = @q.result(distinct: true).includes(:cute_equipments)
+    @installations = @q.result(distinct: true).includes(:cute_equipments, :installation_type_ref)
   end
 
   def show

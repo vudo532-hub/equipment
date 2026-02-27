@@ -57,6 +57,10 @@ class CuteEquipment < ApplicationRecord
     return all if query.blank?
     where("equipment_model ILIKE :q OR inventory_number ILIKE :q OR serial_number ILIKE :q", q: "%#{query}%")
   }
+  # Optimized scope: includes all associations needed for index/list views
+  scope :with_associations, -> { includes(:cute_installation, :equipment_type_ref) }
+  # Optimized scope: for repair list (status: maintenance, not assigned)
+  scope :for_repair, -> { where(status: :maintenance).ordered }
 
   # Callbacks
   before_save :update_last_action_date

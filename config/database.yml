@@ -85,6 +85,11 @@ production:
     database: equipment_production
     username: equipment
     password: <%= ENV["EQUIPMENT_DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
+    port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+    prepared_statements: true
+    advisory_locks: true
   cache:
     <<: *primary_production
     database: equipment_production_cache

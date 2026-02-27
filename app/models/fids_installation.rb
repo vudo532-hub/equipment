@@ -28,6 +28,11 @@ class FidsInstallation < ApplicationRecord
   scope :by_type, ->(type) { where(installation_type: type) if type.present? }
   scope :by_terminal, ->(terminal) { where(terminal: terminal) if terminal.present? }
   scope :search_by_name, ->(query) { where("name ILIKE ?", "%#{query}%") if query.present? }
+  scope :with_equipment_counts, -> {
+    left_joins(:fids_equipments)
+      .select("fids_installations.*, COUNT(fids_equipments.id) AS equipments_count")
+      .group("fids_installations.id")
+  }
 
   # Callbacks
   strip_attributes

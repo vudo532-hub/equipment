@@ -1,0 +1,58 @@
+[Unit]
+Description=Equipment Management System (Puma Web Server)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=equipment
+Group=equipment
+WorkingDirectory=/opt/equipment
+Environment=RAILS_ENV=production
+Environment=RAILS_LOG_TO_STDOUT=true
+Environment=PORT=3000
+Environment=WEB_CONCURRENCY=2
+Environment=RAILS_MAX_THREADS=5
+Environment=FORCE_SSL=false
+Environment=ASSUME_SSL=false
+
+# Secret key base (ОБЯЗАТЕЛЬНО замените!)
+Environment=SECRET_KEY_BASE=REPLACE_ME_WITH_GENERATED_SECRET
+
+# База данных
+Environment=EQUIPMENT_DATABASE_PASSWORD=REPLACE_ME
+Environment=DATABASE_HOST=localhost
+Environment=DATABASE_PORT=5432
+
+# LDAP (опционально)
+# Environment=LDAP_HOST=ldap.example.com
+# Environment=LDAP_PORT=389
+# Environment=LDAP_BASE=dc=example,dc=com
+
+# SMTP (опционально)
+# Environment=SMTP_HOST=mail.example.com
+# Environment=SMTP_PORT=587
+# Environment=SMTP_DOMAIN=example.com
+# Environment=SMTP_USER=equipment@example.com
+# Environment=SMTP_PASSWORD=password
+# Environment=APP_HOST=equipment.example.com
+
+ExecStart=/bin/bash -lc 'cd /opt/equipment && bundle exec puma -C config/puma.rb'
+ExecStop=/bin/kill -SIGTERM $MAINPID
+
+Restart=always
+RestartSec=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=equipment-web
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/equipment/log /opt/equipment/tmp /opt/equipment/storage /opt/equipment/public
+
+[Install]
+WantedBy=multi-user.target

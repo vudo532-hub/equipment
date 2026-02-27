@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_26_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -78,10 +78,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.string "remote_address"
     t.string "request_uuid"
     t.datetime "created_at"
+    t.index ["action", "created_at"], name: "index_audits_on_action_and_created_at"
     t.index ["associated_type", "associated_id"], name: "associated_index"
     t.index ["auditable_type", "auditable_id", "version"], name: "auditable_index"
+    t.index ["auditable_type", "created_at"], name: "index_audits_on_auditable_type_and_created_at"
     t.index ["created_at"], name: "index_audits_on_created_at"
     t.index ["request_uuid"], name: "index_audits_on_request_uuid"
+    t.index ["user_id", "created_at"], name: "index_audits_on_user_id_and_created_at"
     t.index ["user_id", "user_type"], name: "user_index"
   end
 
@@ -104,11 +107,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.index ["equipment_model"], name: "index_cute_equipments_on_equipment_model"
     t.index ["equipment_type", "cute_installation_id"], name: "idx_on_equipment_type_cute_installation_id_620304c018"
     t.index ["equipment_type"], name: "index_cute_equipments_on_equipment_type"
+    t.index ["equipment_type_ref_id", "status"], name: "index_cute_equipments_on_type_ref_and_status"
     t.index ["equipment_type_ref_id"], name: "index_cute_equipments_on_equipment_type_ref_id"
     t.index ["inventory_number"], name: "index_cute_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_cute_equipments_on_last_action_date"
     t.index ["last_changed_by_id"], name: "index_cute_equipments_on_last_changed_by_id"
     t.index ["serial_number"], name: "index_cute_equipments_on_serial_number"
+    t.index ["status", "created_at"], name: "index_cute_equipments_on_status_and_created_at"
+    t.index ["status", "last_action_date"], name: "index_cute_equipments_on_status_and_last_action_date"
     t.index ["status"], name: "index_cute_equipments_on_status"
     t.index ["user_id", "inventory_number"], name: "index_cute_equipments_on_user_id_and_inventory_number", unique: true
     t.index ["user_id"], name: "index_cute_equipments_on_user_id"
@@ -123,6 +129,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.datetime "updated_at", null: false
     t.integer "terminal"
     t.bigint "installation_type_ref_id"
+    t.index ["installation_type", "terminal"], name: "index_cute_installations_on_type_and_terminal"
     t.index ["installation_type"], name: "index_cute_installations_on_installation_type"
     t.index ["installation_type_ref_id"], name: "index_cute_installations_on_installation_type_ref_id"
     t.index ["name"], name: "index_cute_installations_on_name"
@@ -162,12 +169,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.index ["equipment_model"], name: "index_fids_equipments_on_equipment_model"
     t.index ["equipment_type", "fids_installation_id"], name: "idx_on_equipment_type_fids_installation_id_9345370e8c"
     t.index ["equipment_type"], name: "index_fids_equipments_on_equipment_type"
+    t.index ["equipment_type_ref_id", "status"], name: "index_fids_equipments_on_type_ref_and_status"
     t.index ["equipment_type_ref_id"], name: "index_fids_equipments_on_equipment_type_ref_id"
     t.index ["fids_installation_id"], name: "index_fids_equipments_on_fids_installation_id"
     t.index ["inventory_number"], name: "index_fids_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_fids_equipments_on_last_action_date"
     t.index ["last_changed_by_id"], name: "index_fids_equipments_on_last_changed_by_id"
     t.index ["serial_number"], name: "index_fids_equipments_on_serial_number"
+    t.index ["status", "created_at"], name: "index_fids_equipments_on_status_and_created_at"
+    t.index ["status", "last_action_date"], name: "index_fids_equipments_on_status_and_last_action_date"
     t.index ["status"], name: "index_fids_equipments_on_status"
     t.index ["user_id", "inventory_number"], name: "index_fids_equipments_on_user_id_and_inventory_number", unique: true
     t.index ["user_id"], name: "index_fids_equipments_on_user_id"
@@ -182,6 +192,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.datetime "updated_at", null: false
     t.integer "terminal"
     t.bigint "installation_type_ref_id"
+    t.index ["installation_type", "terminal"], name: "index_fids_installations_on_type_and_terminal"
     t.index ["installation_type"], name: "index_fids_installations_on_installation_type"
     t.index ["installation_type_ref_id"], name: "index_fids_installations_on_installation_type_ref_id"
     t.index ["name"], name: "index_fids_installations_on_name"
@@ -218,6 +229,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.string "repair_ticket_number"
     t.string "equipment_type_name"
     t.index ["equipment_type", "equipment_id"], name: "index_repair_batch_items_on_equipment_type_and_equipment_id"
+    t.index ["repair_batch_id", "system"], name: "index_repair_batch_items_on_batch_and_system"
     t.index ["repair_batch_id"], name: "index_repair_batch_items_on_repair_batch_id"
     t.index ["serial_number"], name: "index_repair_batch_items_on_serial_number"
     t.index ["system"], name: "index_repair_batch_items_on_system"
@@ -233,6 +245,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.datetime "updated_at", null: false
     t.index ["created_at"], name: "index_repair_batches_on_created_at"
     t.index ["repair_number"], name: "index_repair_batches_on_repair_number", unique: true
+    t.index ["status", "created_at"], name: "index_repair_batches_on_status_and_created_at"
     t.index ["status"], name: "index_repair_batches_on_status"
     t.index ["user_id"], name: "index_repair_batches_on_user_id"
   end
@@ -273,11 +286,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.index ["equipment_model"], name: "index_zamar_equipments_on_equipment_model"
     t.index ["equipment_type", "zamar_installation_id"], name: "idx_on_equipment_type_zamar_installation_id_ecc9e009e3"
     t.index ["equipment_type"], name: "index_zamar_equipments_on_equipment_type"
+    t.index ["equipment_type_ref_id", "status"], name: "index_zamar_equipments_on_type_ref_and_status"
     t.index ["equipment_type_ref_id"], name: "index_zamar_equipments_on_equipment_type_ref_id"
     t.index ["inventory_number"], name: "index_zamar_equipments_on_inventory_number"
     t.index ["last_action_date"], name: "index_zamar_equipments_on_last_action_date"
     t.index ["last_changed_by_id"], name: "index_zamar_equipments_on_last_changed_by_id"
     t.index ["serial_number"], name: "index_zamar_equipments_on_serial_number"
+    t.index ["status", "created_at"], name: "index_zamar_equipments_on_status_and_created_at"
+    t.index ["status", "last_action_date"], name: "index_zamar_equipments_on_status_and_last_action_date"
     t.index ["status"], name: "index_zamar_equipments_on_status"
     t.index ["user_id", "inventory_number"], name: "index_zamar_equipments_on_user_id_and_inventory_number", unique: true
     t.index ["user_id"], name: "index_zamar_equipments_on_user_id"
@@ -293,6 +309,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_174755) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "installation_type_ref_id"
+    t.index ["installation_type", "terminal"], name: "index_zamar_installations_on_type_and_terminal"
     t.index ["installation_type"], name: "index_zamar_installations_on_installation_type"
     t.index ["installation_type_ref_id"], name: "index_zamar_installations_on_installation_type_ref_id"
     t.index ["name"], name: "index_zamar_installations_on_name"

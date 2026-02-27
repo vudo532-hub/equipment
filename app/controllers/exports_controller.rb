@@ -2,7 +2,7 @@ class ExportsController < ApplicationController
   before_action :authenticate_user!
 
   def cute_equipments
-    @equipments = CuteEquipment.includes(:cute_installation).ordered
+    @equipments = CuteEquipment.includes(:cute_installation, :equipment_type_ref).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -13,7 +13,7 @@ class ExportsController < ApplicationController
   end
 
   def fids_equipments
-    @equipments = FidsEquipment.includes(:fids_installation).ordered
+    @equipments = FidsEquipment.includes(:fids_installation, :equipment_type_ref).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -24,7 +24,7 @@ class ExportsController < ApplicationController
   end
 
   def zamar_equipments
-    @equipments = ZamarEquipment.includes(:zamar_installation).ordered
+    @equipments = ZamarEquipment.includes(:zamar_installation, :equipment_type_ref).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -35,7 +35,7 @@ class ExportsController < ApplicationController
   end
 
   def cute_installations
-    @installations = CuteInstallation.includes(:cute_equipments).ordered
+    @installations = CuteInstallation.includes(:cute_equipments, :installation_type_ref).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -46,7 +46,7 @@ class ExportsController < ApplicationController
   end
 
   def fids_installations
-    @installations = FidsInstallation.includes(:fids_equipments).ordered
+    @installations = FidsInstallation.includes(:fids_equipments, :installation_type_ref).ordered
     
     respond_to do |format|
       format.xlsx {
@@ -57,7 +57,7 @@ class ExportsController < ApplicationController
   end
 
   def zamar_installations
-    @installations = ZamarInstallation.includes(:zamar_equipments).ordered
+    @installations = ZamarInstallation.includes(:zamar_equipments, :installation_type_ref).ordered
     
     respond_to do |format|
       format.xlsx {

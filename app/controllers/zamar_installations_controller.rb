@@ -6,7 +6,7 @@ class ZamarInstallationsController < ApplicationController
   def index
     @q = ZamarInstallation.ransack(params[:q])
     @q.sorts = "name asc" if @q.sorts.empty?
-    @installations = @q.result(distinct: true).includes(:zamar_equipments)
+    @installations = @q.result(distinct: true).includes(:zamar_equipments, :installation_type_ref)
   end
 
   def show

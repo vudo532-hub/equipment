@@ -49,5 +49,9 @@ module Equipment
       g.test_framework :rspec
       g.fixture_replacement :factory_bot, dir: "spec/factories"
     end
+
+    # === Performance: Gzip compression ===
+    # Compress all responses for faster network transfer
+    config.middleware.use Rack::Deflater
   end
 end

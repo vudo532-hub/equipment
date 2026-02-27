@@ -1,0 +1,33 @@
+[Unit]
+Description=Equipment Management System (Solid Queue Worker)
+After=network.target postgresql.service equipment-web.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=equipment
+Group=equipment
+WorkingDirectory=/opt/equipment
+Environment=RAILS_ENV=production
+Environment=SECRET_KEY_BASE=REPLACE_ME_WITH_GENERATED_SECRET
+Environment=EQUIPMENT_DATABASE_PASSWORD=REPLACE_ME
+Environment=DATABASE_HOST=localhost
+Environment=DATABASE_PORT=5432
+
+ExecStart=/bin/bash -lc 'cd /opt/equipment && bundle exec rake solid_queue:start'
+ExecStop=/bin/kill -SIGTERM $MAINPID
+
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=equipment-queue
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/equipment/log /opt/equipment/tmp /opt/equipment/storage
+
+[Install]
+WantedBy=multi-user.target

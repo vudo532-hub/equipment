@@ -30,6 +30,11 @@ class ZamarInstallation < ApplicationRecord
   scope :by_type, ->(type) { where(installation_type: type) if type.present? }
   scope :by_terminal, ->(terminal) { where(terminal: terminal) if terminal.present? }
   scope :search_by_name, ->(query) { where("name ILIKE ?", "%#{query}%") if query.present? }
+  scope :with_equipment_counts, -> {
+    left_joins(:zamar_equipments)
+      .select("zamar_installations.*, COUNT(zamar_equipments.id) AS equipments_count")
+      .group("zamar_installations.id")
+  }
 
   # Callbacks
   strip_attributes

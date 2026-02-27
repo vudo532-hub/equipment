@@ -6,7 +6,7 @@ class FidsInstallationsController < ApplicationController
   def index
     @q = FidsInstallation.ransack(params[:q])
     @q.sorts = "name asc" if @q.sorts.empty?
-    @installations = @q.result(distinct: true).includes(:fids_equipments)
+    @installations = @q.result(distinct: true).includes(:fids_equipments, :installation_type_ref)
   end
 
   def show
