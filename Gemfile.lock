@@ -229,7 +229,10 @@ GEM
       racc (~> 1.4)
     orm_adapter (0.5.0)
     ostruct (0.6.3)
-    pagy (6.5.0)
+    pagy (43.3.1)
+      json
+      uri
+      yaml
     parallel (1.27.0)
     parser (3.3.10.1)
       ast (~> 2.4.1)
@@ -449,6 +452,7 @@ GEM
     write_xlsx (1.12.3)
       nkf
       rubyzip (>= 2.4.0, < 4.0)
+    yaml (0.4.0)
     zeitwerk (2.7.4)
 
 PLATFORMS
@@ -483,7 +487,7 @@ DEPENDENCIES
   kamal
   net-ldap
   nilify_blanks
-  pagy (~> 6.5)
+  pagy (~> 43.3)
   pg (~> 1.1)
   propshaft
   puma (>= 5.0)
