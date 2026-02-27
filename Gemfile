@@ -25,6 +25,7 @@ gem "jbuilder"
 gem "devise"
 gem "devise-i18n"
 gem "pundit"
+gem "net-ldap"
 
 # === Search & Filtering ===
 gem "ransack"

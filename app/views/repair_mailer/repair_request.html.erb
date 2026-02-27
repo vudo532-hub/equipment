@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 14px; color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #4472C4; color: white; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    .header { background-color: #f0f4f8; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2 style="margin: 0; color: #1a365d;">Заявка на ремонт <%= @batch.repair_number %></h2>
+    <p style="margin: 5px 0 0;">Дата: <%= @batch.created_at.strftime("%d.%m.%Y %H:%M") %></p>
+    <% if @batch.user.present? %>
+      <p style="margin: 5px 0 0;">Отправитель: <%= @batch.user.full_name %></p>
+    <% end %>
+  </div>
+
+  <p>Направляем оборудование в ремонт. Количество единиц: <strong><%= @items.count %></strong></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>№</th>
+        <th>Система</th>
+        <th>Тип</th>
+        <th>Модель</th>
+        <th>Инв. номер</th>
+        <th>Серийный номер</th>
+        <th>Терминал</th>
+        <th>Место установки</th>
+        <th>Примечание</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @items.each_with_index do |item, index| %>
+        <tr>
+          <td><%= index + 1 %></td>
+          <td><%= item.system %></td>
+          <td><%= item.equipment_type_display %></td>
+          <td><%= item.model.presence || "—" %></td>
+          <td><%= item.inventory_number.presence || "—" %></td>
+          <td><%= item.serial_number.presence || "—" %></td>
+          <td><%= item.terminal.presence || "—" %></td>
+          <td><%= item.installation_name.presence || "—" %></td>
+          <td><%= item.note.presence || "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @batch.notes.present? %>
+    <p><strong>Дополнительные замечания:</strong></p>
+    <p><%= simple_format(@batch.notes) %></p>
+  <% end %>
+
+  <div class="footer">
+    <p>Это автоматическое уведомление от системы учёта оборудования EMS.</p>
+    <p>При ответе на это письмо укажите номер заявки: <strong><%= @batch.repair_number %></strong></p>
+  </div>
+</body>
+</html>

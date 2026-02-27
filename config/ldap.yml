@@ -1,0 +1,24 @@
+development:
+  host: ldap.example.com
+  port: 389
+  base: "DC=corp,DC=example,DC=com"
+  attribute: sAMAccountName
+  ssl: false
+  # admin_user: "CN=svc-equipment,OU=Service Accounts,DC=corp,DC=example,DC=com"
+  # admin_password: "service_password"
+
+test:
+  host: ldap.example.com
+  port: 389
+  base: "DC=corp,DC=example,DC=com"
+  attribute: sAMAccountName
+  ssl: false
+
+production:
+  host: <%= ENV['LDAP_HOST'] %>
+  port: <%= ENV['LDAP_PORT'] || 389 %>
+  base: <%= ENV['LDAP_BASE_DN'] %>
+  attribute: sAMAccountName
+  ssl: <%= ENV['LDAP_SSL'] || false %>
+  admin_user: <%= ENV['LDAP_ADMIN_USER'] %>
+  admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] %>

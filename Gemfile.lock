@@ -194,6 +194,9 @@ GEM
     net-imap (0.6.2)
       date
       net-protocol
+    net-ldap (0.20.0)
+      base64
+      ostruct
     net-pop (0.1.2)
       net-protocol
     net-protocol (0.2.2)
@@ -478,6 +481,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  net-ldap
   nilify_blanks
   pagy (~> 6.5)
   pg (~> 1.1)

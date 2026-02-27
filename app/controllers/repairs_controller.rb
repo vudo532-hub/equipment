@@ -210,6 +210,9 @@ class RepairsController < ApplicationController
       batch_id: @batch.id,
       repair_number: @batch.repair_number
     }
+
+    # Отправка email асинхронно (не блокирует HTTP-ответ)
+    RepairMailer.repair_request(@batch).deliver_later
   rescue ActiveRecord::RecordInvalid => e
     render json: { success: false, error: e.message }, status: :unprocessable_entity
   rescue StandardError => e

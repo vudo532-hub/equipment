@@ -1,0 +1,23 @@
+Заявка на ремонт <%= @batch.repair_number %>
+Дата: <%= @batch.created_at.strftime("%d.%m.%Y %H:%M") %>
+<% if @batch.user.present? %>Отправитель: <%= @batch.user.full_name %><% end %>
+
+Направляем оборудование в ремонт. Количество единиц: <%= @items.count %>
+
+<% @items.each_with_index do |item, index| %>
+<%= index + 1 %>. <%= item.system %> | <%= item.equipment_type_display %>
+   Модель: <%= item.model.presence || "—" %>
+   Инв. номер: <%= item.inventory_number.presence || "—" %>
+   Серийный номер: <%= item.serial_number.presence || "—" %>
+   Терминал: <%= item.terminal.presence || "—" %>
+   Место установки: <%= item.installation_name.presence || "—" %>
+   Примечание: <%= item.note.presence || "—" %>
+<% end %>
+<% if @batch.notes.present? %>
+Дополнительные замечания:
+<%= @batch.notes %>
+<% end %>
+
+---
+Это автоматическое уведомление от системы учёта оборудования EMS.
+При ответе на это письмо укажите номер заявки: <%= @batch.repair_number %>

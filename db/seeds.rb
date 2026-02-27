@@ -15,6 +15,7 @@ end
 # Создание администратора (сильный пароль)
 admin = User.find_or_initialize_by(email: "nn.sirotkin@svo.su")
 admin.assign_attributes(
+  login: "nn.sirotkin",
   password: "SecureAdmin1!",
   password_confirmation: "SecureAdmin1!",
   first_name: "Николай",
@@ -22,11 +23,26 @@ admin.assign_attributes(
   role: :admin
 )
 admin.save!
-puts "Администратор: #{admin.email} (#{admin.full_name})"
+puts "Администратор: #{admin.email} / login: #{admin.login} (#{admin.full_name})"
+
+# Создание локального администратора (fallback без LDAP)
+local_admin = User.find_or_initialize_by(login: "administrator")
+local_admin.assign_attributes(
+  email: "administrator@equipment.local",
+  password: "allvanity",
+  password_confirmation: "allvanity",
+  first_name: "Администратор",
+  last_name: "Системы",
+  role: :admin
+)
+# Skip strong password validation for this special user
+local_admin.save!(validate: false)
+puts "Локальный администратор: login: administrator / password: allvanity"
 
 # Создание тестового пользователя (сильный пароль)
 user = User.find_or_initialize_by(email: "test@example.com")
 user.assign_attributes(
+  login: "testuser",
   password: "Secure1Pass",
   password_confirmation: "Secure1Pass",
   first_name: "Тестовый",
@@ -34,7 +50,7 @@ user.assign_attributes(
   role: :editor
 )
 user.save!
-puts "Пользователь: #{user.email} (#{user.full_name})"
+puts "Пользователь: #{user.email} / login: #{user.login} (#{user.full_name})"
 
 # Типы мест установки CUTE
 cute_installation_types = ["Стойка регистрации", "Выход на посадку", "Транзит", "Негабарит", "VIP", "Комплектовка", "Камера хранения", "Учебный класс", "Склад", "ЦУИТ", "Комната", "Киоск самообслуживания"]
@@ -128,8 +144,9 @@ puts "Тестовые данные созданы!"
 puts "=" * 50
 puts ""
 puts "Данные для входа:"
-puts "  Администратор: nn.sirotkin@svo.su / SecureAdmin1!"
-puts "  Тест-пользователь: test@example.com / Secure1Pass"
+puts "  Администратор: login: nn.sirotkin / password: SecureAdmin1!"
+puts "  Локальный admin: login: administrator / password: allvanity"
+puts "  Тест-пользователь: login: testuser / password: Secure1Pass"
 puts ""
 puts "Статистика:"
 puts "  Пользователей: #{User.count}"
