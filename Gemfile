@@ -31,7 +31,7 @@ gem "net-ldap"
 gem "ransack"
 
 # === Pagination ===
-gem "pagy", "~> 6.5"
+gem "pagy", "~> 43.3"
 
 # === Export (CSV, Excel) ===
 gem "csv"
